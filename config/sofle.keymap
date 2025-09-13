@@ -17,14 +17,14 @@ setup mouse scroll on encoders
 #include <dt-bindings/zmk/rgb.h>
 #include <dt-bindings/zmk/pointing.h>
 
-#define BASE 0m>
+#define BASE 0
 #define LOWER 1
 #define RAISE 2
 #define ADJUST 3
 
 / {
     behaviors {
-        mouse_enc: sensor_rotate_kp {
+        scroll_up_down: behavior_sensor_rotate_mouse_wheel_up_down  {
             compatible = "zmk,behavior-sensor-rotate";
             tap-ms = <20>;
             bindings = <&msc SCRL_UP>, <&msc SCRL_DOWN>;
@@ -60,7 +60,7 @@ setup mouse scroll on encoders
                     &kp LGUI  &kp LALT  &kp LCTRL  &mo LOWER  &kp SPACE     &kp RET          &mo RAISE  &kp RCTRL  &kp RALT   &kp RGUI
             >;
 
-            sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &sensor_rotate_kp>;
+            sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &scroll_up_down>;
         };
 
         lower_layer {

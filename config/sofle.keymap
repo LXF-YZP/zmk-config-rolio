@@ -4,20 +4,34 @@
  * SPDX-License-Identifier: MIT
  */
 
+/*
+https://github.com/zmkfirmware/zmk/issues/72#issuecomment-2081690485
+setup mouse scroll on encoders
+*/
+#define ZMK_MOUSE_SCRL_VAL 140
+
 #include <behaviors.dtsi>
 #include <dt-bindings/zmk/bt.h>
 #include <dt-bindings/zmk/ext_power.h>
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/rgb.h>
+#include <dt-bindings/zmk/pointing.h>
 
-#define BASE 0
+#define BASE 0m>
 #define LOWER 1
 #define RAISE 2
 #define ADJUST 3
 
 / {
-    // Activate ADJUST layer by pressing raise and lower
+    behaviors {
+        mouse_enc: sensor_rotate_kp {
+            compatible = "zmk,behavior-sensor-rotate";
+            tap-ms = <20>;
+            bindings = <&msc SCRL_UP>, <&msc SCRL_DOWN>;
+        };
+    };
 
+    // Activate ADJUST layer by pressing raise and lower
     conditional_layers {
         compatible = "zmk,conditional-layers";
 
@@ -46,7 +60,7 @@
                     &kp LGUI  &kp LALT  &kp LCTRL  &mo LOWER  &kp SPACE     &kp RET          &mo RAISE  &kp RCTRL  &kp RALT   &kp RGUI
             >;
 
-            sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;
+            sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &sensor_rotate_kp>;
         };
 
         lower_layer {

@@ -24,10 +24,11 @@ setup mouse scroll on encoders
 
 / {
     behaviors {
-        scroll_up_down: behavior_sensor_rotate_mouse_wheel_up_down  {
-            compatible = "zmk,behavior-sensor-rotate";
+        mouse_enc: sensor_rotate_kp {
+            compatible = "zmk,behavior-sensor-rotate-var";
             tap-ms = <20>;
-            bindings = <&msc SCRL_UP>, <&msc SCRL_DOWN>;
+            #sensor-binding-cells = <2>;
+            bindings = <&msc>, <&msc>;
         };
     };
 
@@ -60,7 +61,7 @@ setup mouse scroll on encoders
                     &kp LGUI  &kp LALT  &kp LCTRL  &mo LOWER  &kp SPACE     &kp RET          &mo RAISE  &kp RCTRL  &kp RALT   &kp RGUI
             >;
 
-            sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &scroll_up_down>;
+            sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &mouse_enc SCRL_UP SCRL_DOWN>;
         };
 
         lower_layer {

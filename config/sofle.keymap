@@ -9,6 +9,7 @@ https://github.com/zmkfirmware/zmk/issues/72#issuecomment-2081690485
 setup mouse scroll on encoders
 */
 #define ZMK_MOUSE_SCRL_VAL 140
+#define ZMK_POINTING_DEFAULT_SCRL_VAL 70    // default: 10
 
 #include <behaviors.dtsi>
 #include <dt-bindings/zmk/bt.h>

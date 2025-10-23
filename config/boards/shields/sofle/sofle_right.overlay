@@ -67,6 +67,6 @@
         stationary-threshold = <5>;
 
         // flips x and y axis
-        switch-xy = true;
+        switch-xy = <true>;
     };
 };

@@ -66,6 +66,7 @@
         bottom-beta = <5>;
         stationary-threshold = <5>;
 
-        switch-xy;
+        // flips x and y axis
+        //switch-xy;
     };
 };

@@ -5,6 +5,7 @@
  */
 
 #include "sofle.dtsi"
+#include <dt-bindings/zmk/input_transform.h>
 
 &kscan0 {
     col-gpios
@@ -32,4 +33,5 @@
 
 &tps43_listener {
     status = "okay";
+    input-processors = <&zip_xy_swap_mapper>
 };

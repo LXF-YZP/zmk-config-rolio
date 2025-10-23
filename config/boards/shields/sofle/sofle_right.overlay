@@ -32,9 +32,8 @@
     vbatt: vbatt {
         compatible = "zmk,battery-nrf-vddh";
     };
-    
-    tps43_input: tps43_input {
-        compatible = "zmk,input-listener";
-        device = <&tps43>;
-    };
+};
+
+&tps43_split {
+    device = <&tps43>;
 };

@@ -29,3 +29,7 @@
         compatible = "zmk,battery-nrf-vddh";
     };
 };
+
+&tps43_listener {
+    status = "okay";
+};

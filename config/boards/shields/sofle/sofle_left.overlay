@@ -17,9 +17,6 @@
         ;
 };
 
-&left_encoder {
-    status = "okay";
-};
 / {
     chosen {
       zmk,battery = &vbatt;

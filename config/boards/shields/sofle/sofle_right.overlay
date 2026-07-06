@@ -32,6 +32,7 @@
 };
 
 &tps43_split {
+    status = "okay";
     device = <&tps43>;
 };
 

@@ -91,8 +91,10 @@ RC(2,0) RC(2,1) RC(2,2) RC(2,3) RC(2,4) RC(2,5)                    RC(2,6) RC(2,
         compatible = "azoteq,iqs5xx";
         reg = <0x74>;
 
-        reset-gpios = <&gpio0 21 GPIO_ACTIVE_LOW>;
-        rdy-gpios = <&gpio0 19 GPIO_ACTIVE_HIGH>;
+        // TPS43 RESET -> nice_nano_v2 D21/A3
+        reset-gpios = <&pro_micro 21 GPIO_ACTIVE_LOW>;
+        // TPS43 RDY/INT -> nice_nano_v2 D16
+        rdy-gpios = <&pro_micro 16 GPIO_ACTIVE_HIGH>;
 
         /*
          * Potentially non-exhaustive list of configuration options.

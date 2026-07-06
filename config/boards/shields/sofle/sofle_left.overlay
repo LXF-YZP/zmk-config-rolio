@@ -30,3 +30,7 @@
 &tps43_listener {
     status = "okay";
 };
+
+&tps43_split {
+    status = "okay";
+};

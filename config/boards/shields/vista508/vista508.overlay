@@ -44,14 +44,6 @@ nice_view_spi: &spi0 {
     status = "disabled";
 };
 
-&tps43_split {
-    status = "disabled";
-};
-
-&tps43_listener {
-    status = "disabled";
-};
-
 &nice_view_spi {
     status = "okay";
     vista508: ls0xx@0 {

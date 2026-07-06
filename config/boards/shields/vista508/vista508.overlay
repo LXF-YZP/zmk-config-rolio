@@ -36,6 +36,14 @@ nice_view_spi: &spi0 {
     status = "disabled";
 };
 
+&oled {
+    status = "disabled";
+};
+
+&tps43 {
+    status = "disabled";
+};
+
 &nice_view_spi {
     status = "okay";
     vista508: ls0xx@0 {

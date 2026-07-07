@@ -86,34 +86,6 @@ RC(2,0) RC(2,1) RC(2,2) RC(2,3) RC(2,4) RC(2,5)                    RC(2,6) RC(2,
         prechargep = <0x22>;
     };
 
-    tps43: iqs5xx@74 {
-        status = "disabled";
-        compatible = "azoteq,iqs5xx";
-        reg = <0x74>;
-
-        // TPS43 RESET -> nice_nano_v2 D21/A3
-        reset-gpios = <&pro_micro 21 GPIO_ACTIVE_LOW>;
-        // TPS43 RDY/INT -> nice_nano_v2 D16
-        rdy-gpios = <&pro_micro 16 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;
-
-        /*
-         * Potentially non-exhaustive list of configuration options.
-         * See: dts/bindings/input/azoteq,iqs5xx-common.yaml for a full list.
-         */
-        one-finger-tap;
-        press-and-hold;
-        press-and-hold-time = <250>;
-        two-finger-tap;
-
-        scroll;
-        natural-scroll-y;
-        natural-scroll-x;
-
-        bottom-beta = <5>;
-        stationary-threshold = <5>;
-
-        switch-xy;
-    };
 };
 
 

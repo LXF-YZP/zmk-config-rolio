@@ -41,36 +41,38 @@ LV_IMG_DECLARE(shift_0);
 LV_IMG_DECLARE(opt_0);
 LV_IMG_DECLARE(cmd_0);
 
-LV_IMG_DECLARE(bongo_cat_double_tap1_03);
-LV_IMG_DECLARE(bongo_cat_double_tap1_06);
-LV_IMG_DECLARE(bongo_cat_double_tap2_02);
-LV_IMG_DECLARE(bongo_cat_tap1_03);
-LV_IMG_DECLARE(bongo_cat_tap2_03);
+LV_IMG_DECLARE(dog_sit1_90);
+LV_IMG_DECLARE(dog_sit2_90);
+LV_IMG_DECLARE(dog_walk1_90);
+LV_IMG_DECLARE(dog_walk2_90);
+LV_IMG_DECLARE(dog_run1_90);
+LV_IMG_DECLARE(dog_run2_90);
 
 #define SRC(array) (const void **)array, (sizeof(array) / sizeof(array[0]))
 
-enum bongo_anim_state {
-    BONGO_ANIM_NONE,
-    BONGO_ANIM_IDLE,
-    BONGO_ANIM_SLOW,
-    BONGO_ANIM_MID,
-    BONGO_ANIM_FAST,
+enum luna_anim_state {
+    LUNA_ANIM_NONE,
+    LUNA_ANIM_IDLE,
+    LUNA_ANIM_SLOW,
+    LUNA_ANIM_MID,
+    LUNA_ANIM_FAST,
 };
 
-static const lv_img_dsc_t *bongo_idle_imgs[] = {
-    &bongo_cat_double_tap1_06,
+static const lv_img_dsc_t *luna_idle_imgs[] = {
+    &dog_sit1_90,
+    &dog_sit2_90,
 };
-static const lv_img_dsc_t *bongo_slow_imgs[] = {
-    &bongo_cat_tap1_03,
-    &bongo_cat_tap2_03,
+static const lv_img_dsc_t *luna_slow_imgs[] = {
+    &dog_walk1_90,
+    &dog_walk2_90,
 };
-static const lv_img_dsc_t *bongo_mid_imgs[] = {
-    &bongo_cat_tap1_03,
-    &bongo_cat_tap2_03,
+static const lv_img_dsc_t *luna_mid_imgs[] = {
+    &dog_walk1_90,
+    &dog_walk2_90,
 };
-static const lv_img_dsc_t *bongo_fast_imgs[] = {
-    &bongo_cat_double_tap2_02,
-    &bongo_cat_double_tap1_03,
+static const lv_img_dsc_t *luna_fast_imgs[] = {
+    &dog_run1_90,
+    &dog_run2_90,
 };
 
 struct output_status_state {
@@ -209,53 +211,53 @@ static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status
     draw_layer(canvas, state);
 }
 
-static void set_bongo_animation(struct zmk_widget_status *widget, uint8_t wpm) {
-    enum bongo_anim_state next_state;
+static void set_luna_animation(struct zmk_widget_status *widget, uint8_t wpm) {
+    enum luna_anim_state next_state;
     uint16_t duration;
 
-    if (widget->bongo == NULL) {
+    if (widget->luna == NULL) {
         return;
     }
 
     if (wpm < 5) {
-        next_state = BONGO_ANIM_IDLE;
-        duration = 10000;
+        next_state = LUNA_ANIM_IDLE;
+        duration = 960;
     } else if (wpm < 30) {
-        next_state = BONGO_ANIM_SLOW;
-        duration = 2000;
+        next_state = LUNA_ANIM_SLOW;
+        duration = 200;
     } else if (wpm < 70) {
-        next_state = BONGO_ANIM_MID;
-        duration = 500;
+        next_state = LUNA_ANIM_MID;
+        duration = 200;
     } else {
-        next_state = BONGO_ANIM_FAST;
+        next_state = LUNA_ANIM_FAST;
         duration = 200;
     }
 
-    if (widget->bongo_anim_state == next_state) {
+    if (widget->luna_anim_state == next_state) {
         return;
     }
 
     switch (next_state) {
-    case BONGO_ANIM_IDLE:
-        lv_animimg_set_src(widget->bongo, SRC(bongo_idle_imgs));
+    case LUNA_ANIM_IDLE:
+        lv_animimg_set_src(widget->luna, SRC(luna_idle_imgs));
         break;
-    case BONGO_ANIM_SLOW:
-        lv_animimg_set_src(widget->bongo, SRC(bongo_slow_imgs));
+    case LUNA_ANIM_SLOW:
+        lv_animimg_set_src(widget->luna, SRC(luna_slow_imgs));
         break;
-    case BONGO_ANIM_MID:
-        lv_animimg_set_src(widget->bongo, SRC(bongo_mid_imgs));
+    case LUNA_ANIM_MID:
+        lv_animimg_set_src(widget->luna, SRC(luna_mid_imgs));
         break;
-    case BONGO_ANIM_FAST:
-        lv_animimg_set_src(widget->bongo, SRC(bongo_fast_imgs));
+    case LUNA_ANIM_FAST:
+        lv_animimg_set_src(widget->luna, SRC(luna_fast_imgs));
         break;
     default:
         return;
     }
 
-    lv_animimg_set_duration(widget->bongo, duration);
-    lv_animimg_set_repeat_count(widget->bongo, LV_ANIM_REPEAT_INFINITE);
-    lv_animimg_start(widget->bongo);
-    widget->bongo_anim_state = next_state;
+    lv_animimg_set_duration(widget->luna, duration);
+    lv_animimg_set_repeat_count(widget->luna, LV_ANIM_REPEAT_INFINITE);
+    lv_animimg_start(widget->luna);
+    widget->luna_anim_state = next_state;
 }
 
 static void set_battery_status(struct zmk_widget_status *widget,
@@ -360,7 +362,7 @@ static void set_wpm_status(struct zmk_widget_status *widget, struct wpm_status_s
     }
     widget->state.wpm[WPM_SAMPLES - 1] = state.wpm;
 
-    set_bongo_animation(widget, state.wpm);
+    set_luna_animation(widget, state.wpm);
     draw_canvas(widget->obj, widget->cbuf, &widget->state);
 }
 
@@ -388,10 +390,10 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     lv_canvas_set_buffer(canvas, widget->cbuf, VISTA508_DISPLAY_WIDTH, VISTA508_DISPLAY_HEIGHT,
                          LV_IMG_CF_TRUE_COLOR);
 
-    widget->bongo = lv_animimg_create(widget->obj);
-    lv_obj_align(widget->bongo, LV_ALIGN_TOP_LEFT, 108, 32);
-    widget->bongo_anim_state = BONGO_ANIM_NONE;
-    set_bongo_animation(widget, 0);
+    widget->luna = lv_animimg_create(widget->obj);
+    lv_obj_align(widget->luna, LV_ALIGN_TOP_LEFT, 109, 42);
+    widget->luna_anim_state = LUNA_ANIM_NONE;
+    set_luna_animation(widget, 0);
 
     sys_slist_append(&widgets, &widget->node);
     widget_battery_status_init();

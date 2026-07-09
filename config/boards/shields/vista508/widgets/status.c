@@ -101,8 +101,8 @@ static void draw_text(lv_obj_t *canvas, lv_coord_t x, lv_coord_t y, lv_coord_t w
 }
 
 static void draw_heading(lv_obj_t *canvas, lv_coord_t y, const char *label, const char *value) {
-    draw_text(canvas, 8, y, 38, &lv_font_montserrat_16, LV_TEXT_ALIGN_LEFT, label);
-    draw_text(canvas, 50, y, 42, &lv_font_montserrat_16, LV_TEXT_ALIGN_LEFT, value);
+    draw_text(canvas, 8, y, 48, &lv_font_montserrat_16, LV_TEXT_ALIGN_LEFT, label);
+    draw_text(canvas, 60, y, 32, &lv_font_montserrat_16, LV_TEXT_ALIGN_LEFT, value);
 }
 
 static void draw_output(lv_obj_t *canvas, const struct status_state *state) {

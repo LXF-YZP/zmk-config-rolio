@@ -41,12 +41,12 @@ LV_IMG_DECLARE(shift_0);
 LV_IMG_DECLARE(opt_0);
 LV_IMG_DECLARE(cmd_0);
 
-LV_IMG_DECLARE(dog_sit1_90);
-LV_IMG_DECLARE(dog_sit2_90);
-LV_IMG_DECLARE(dog_walk1_90);
-LV_IMG_DECLARE(dog_walk2_90);
-LV_IMG_DECLARE(dog_run1_90);
-LV_IMG_DECLARE(dog_run2_90);
+LV_IMG_DECLARE(dog_sit1);
+LV_IMG_DECLARE(dog_sit2);
+LV_IMG_DECLARE(dog_walk1);
+LV_IMG_DECLARE(dog_walk2);
+LV_IMG_DECLARE(dog_run1);
+LV_IMG_DECLARE(dog_run2);
 
 #define SRC(array) (const void **)array, (sizeof(array) / sizeof(array[0]))
 
@@ -66,20 +66,20 @@ enum luna_anim_state {
 };
 
 static const lv_img_dsc_t *luna_idle_imgs[] = {
-    &dog_sit1_90,
-    &dog_sit2_90,
+    &dog_sit1,
+    &dog_sit2,
 };
 static const lv_img_dsc_t *luna_slow_imgs[] = {
-    &dog_walk1_90,
-    &dog_walk2_90,
+    &dog_walk1,
+    &dog_walk2,
 };
 static const lv_img_dsc_t *luna_mid_imgs[] = {
-    &dog_walk1_90,
-    &dog_walk2_90,
+    &dog_walk1,
+    &dog_walk2,
 };
 static const lv_img_dsc_t *luna_fast_imgs[] = {
-    &dog_run1_90,
-    &dog_run2_90,
+    &dog_run1,
+    &dog_run2,
 };
 
 struct output_status_state {
@@ -440,7 +440,7 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
                          LV_IMG_CF_TRUE_COLOR);
 
     widget->luna = lv_animimg_create(widget->obj);
-    lv_obj_align(widget->luna, LV_ALIGN_TOP_LEFT, 109, 42);
+    lv_obj_align(widget->luna, LV_ALIGN_TOP_LEFT, 105, 47);
     widget->luna_anim_state = LUNA_ANIM_NONE;
     set_luna_animation(widget, 0);
 

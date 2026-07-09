@@ -389,7 +389,7 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
                          LV_IMG_CF_TRUE_COLOR);
 
     widget->bongo = lv_animimg_create(widget->obj);
-    lv_obj_align(widget->bongo, LV_ALIGN_TOP_LEFT, 100, 32);
+    lv_obj_align(widget->bongo, LV_ALIGN_TOP_LEFT, 108, 32);
     widget->bongo_anim_state = BONGO_ANIM_NONE;
     set_bongo_animation(widget, 0);
 

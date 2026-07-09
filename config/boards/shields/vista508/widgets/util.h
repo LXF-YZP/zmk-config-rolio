@@ -9,6 +9,8 @@
 #include <zmk/endpoints.h>
 
 #define CANVAS_SIZE 144
+#define VISTA508_DISPLAY_WIDTH 144
+#define VISTA508_DISPLAY_HEIGHT 168
 
 #define WPM_SAMPLES 20
 

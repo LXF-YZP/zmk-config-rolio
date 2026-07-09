@@ -50,6 +50,13 @@ LV_IMG_DECLARE(dog_run2_90);
 
 #define SRC(array) (const void **)array, (sizeof(array) / sizeof(array[0]))
 
+#define WPM_CHART_X 8
+#define WPM_CHART_Y 82
+#define WPM_CHART_WIDTH 80
+#define WPM_CHART_HEIGHT 40
+#define WPM_CHART_PADDING 4
+#define WPM_CHART_MAX 100
+
 enum luna_anim_state {
     LUNA_ANIM_NONE,
     LUNA_ANIM_IDLE,
@@ -105,6 +112,46 @@ static void draw_heading(lv_obj_t *canvas, lv_coord_t y, const char *label, cons
     draw_text(canvas, 60, y, 32, &lv_font_montserrat_16, LV_TEXT_ALIGN_LEFT, value);
 }
 
+static void draw_wpm_grid(lv_obj_t *canvas) {
+    lv_draw_line_dsc_t line_dsc;
+    init_line_dsc(&line_dsc, LVGL_FOREGROUND, 1);
+
+    for (int i = 0; i <= 4; i++) {
+        lv_coord_t x = WPM_CHART_X + (WPM_CHART_WIDTH * i / 4);
+        lv_point_t points[2] = {{x, WPM_CHART_Y}, {x, WPM_CHART_Y + WPM_CHART_HEIGHT}};
+        lv_canvas_draw_line(canvas, points, 2, &line_dsc);
+    }
+
+    for (int i = 0; i <= 4; i++) {
+        lv_coord_t y = WPM_CHART_Y + (WPM_CHART_HEIGHT * i / 4);
+        lv_point_t points[2] = {{WPM_CHART_X, y}, {WPM_CHART_X + WPM_CHART_WIDTH, y}};
+        lv_canvas_draw_line(canvas, points, 2, &line_dsc);
+    }
+}
+
+static void draw_wpm_graph(lv_obj_t *canvas, const struct status_state *state) {
+    lv_draw_line_dsc_t line_dsc;
+    init_line_dsc(&line_dsc, LVGL_FOREGROUND, 2);
+
+    lv_point_t points[WPM_SAMPLES];
+    const int graph_width = WPM_CHART_WIDTH - (WPM_CHART_PADDING * 2);
+    const int graph_height = WPM_CHART_HEIGHT - (WPM_CHART_PADDING * 2);
+    const int baseline = WPM_CHART_Y + WPM_CHART_HEIGHT - WPM_CHART_PADDING;
+
+    for (int i = 0; i < WPM_SAMPLES; i++) {
+        int value = state->wpm[i];
+        if (value > WPM_CHART_MAX) {
+            value = WPM_CHART_MAX;
+        }
+
+        points[i].x = WPM_CHART_X + WPM_CHART_PADDING +
+                      (graph_width * i / (WPM_SAMPLES - 1));
+        points[i].y = baseline - (value * graph_height / WPM_CHART_MAX);
+    }
+
+    lv_canvas_draw_line(canvas, points, WPM_SAMPLES, &line_dsc);
+}
+
 static void draw_output(lv_obj_t *canvas, const struct status_state *state) {
     lv_draw_img_dsc_t img_dsc;
     lv_draw_img_dsc_init(&img_dsc);
@@ -151,6 +198,8 @@ static void draw_wpm(lv_obj_t *canvas, const struct status_state *state) {
 
     snprintf(text, sizeof(text), "%d", current_wpm);
     draw_heading(canvas, 50, "WPM", text);
+    draw_wpm_grid(canvas);
+    draw_wpm_graph(canvas, state);
 }
 
 static void draw_modifiers(lv_obj_t *canvas) {

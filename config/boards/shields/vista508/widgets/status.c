@@ -219,13 +219,13 @@ static void set_bongo_animation(struct zmk_widget_status *widget, uint8_t wpm) {
 
     if (wpm < 5) {
         next_state = BONGO_ANIM_IDLE;
-        duration = 10000;
+        duration = 960;
     } else if (wpm < 30) {
         next_state = BONGO_ANIM_SLOW;
-        duration = 2000;
+        duration = 200;
     } else if (wpm < 70) {
         next_state = BONGO_ANIM_MID;
-        duration = 500;
+        duration = 200;
     } else {
         next_state = BONGO_ANIM_FAST;
         duration = 200;
@@ -389,7 +389,7 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
                          LV_IMG_CF_TRUE_COLOR);
 
     widget->bongo = lv_animimg_create(widget->obj);
-    lv_obj_align(widget->bongo, LV_ALIGN_TOP_LEFT, 108, 32);
+    lv_obj_align(widget->bongo, LV_ALIGN_TOP_LEFT, 94, 44);
     widget->bongo_anim_state = BONGO_ANIM_NONE;
     set_bongo_animation(widget, 0);
 

@@ -41,11 +41,9 @@ LV_IMG_DECLARE(shift_0);
 LV_IMG_DECLARE(opt_0);
 LV_IMG_DECLARE(cmd_0);
 
-LV_IMG_DECLARE(bongo_cat_double_tap1_03);
-LV_IMG_DECLARE(bongo_cat_double_tap1_06);
-LV_IMG_DECLARE(bongo_cat_double_tap2_02);
-LV_IMG_DECLARE(bongo_cat_tap1_03);
-LV_IMG_DECLARE(bongo_cat_tap2_03);
+LV_IMG_DECLARE(dino_idle);
+LV_IMG_DECLARE(dino_run1);
+LV_IMG_DECLARE(dino_run2);
 
 #define SRC(array) (const void **)array, (sizeof(array) / sizeof(array[0]))
 
@@ -55,29 +53,32 @@ LV_IMG_DECLARE(bongo_cat_tap2_03);
 #define WPM_CHART_HEIGHT 40
 #define WPM_CHART_PADDING 4
 #define WPM_CHART_MAX 100
+#define DINO_X 99
+#define DINO_Y 44
+#define DINO_JUMP_Y 30
 
-enum bongo_anim_state {
-    BONGO_ANIM_NONE,
-    BONGO_ANIM_IDLE,
-    BONGO_ANIM_SLOW,
-    BONGO_ANIM_MID,
-    BONGO_ANIM_FAST,
+enum dino_anim_state {
+    DINO_ANIM_NONE,
+    DINO_ANIM_IDLE,
+    DINO_ANIM_SLOW,
+    DINO_ANIM_MID,
+    DINO_ANIM_FAST,
 };
 
-static const lv_img_dsc_t *bongo_idle_imgs[] = {
-    &bongo_cat_double_tap1_06,
+static const lv_img_dsc_t *dino_idle_imgs[] = {
+    &dino_idle,
 };
-static const lv_img_dsc_t *bongo_slow_imgs[] = {
-    &bongo_cat_tap1_03,
-    &bongo_cat_tap2_03,
+static const lv_img_dsc_t *dino_slow_imgs[] = {
+    &dino_run1,
+    &dino_run2,
 };
-static const lv_img_dsc_t *bongo_mid_imgs[] = {
-    &bongo_cat_tap1_03,
-    &bongo_cat_tap2_03,
+static const lv_img_dsc_t *dino_mid_imgs[] = {
+    &dino_run1,
+    &dino_run2,
 };
-static const lv_img_dsc_t *bongo_fast_imgs[] = {
-    &bongo_cat_double_tap2_02,
-    &bongo_cat_double_tap1_03,
+static const lv_img_dsc_t *dino_fast_imgs[] = {
+    &dino_run1,
+    &dino_run2,
 };
 
 struct output_status_state {
@@ -258,53 +259,70 @@ static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status
     draw_layer(canvas, state);
 }
 
-static void set_bongo_animation(struct zmk_widget_status *widget, uint8_t wpm) {
-    enum bongo_anim_state next_state;
+static void set_dino_y(void *dino, int32_t y) { lv_obj_set_y((lv_obj_t *)dino, y); }
+
+static void start_dino_jump(struct zmk_widget_status *widget, uint8_t wpm) {
+    if (widget->dino == NULL || wpm == 0 || lv_obj_get_y(widget->dino) != DINO_Y) {
+        return;
+    }
+
+    lv_anim_t jump;
+    lv_anim_init(&jump);
+    lv_anim_set_var(&jump, widget->dino);
+    lv_anim_set_exec_cb(&jump, set_dino_y);
+    lv_anim_set_values(&jump, DINO_Y, DINO_JUMP_Y);
+    lv_anim_set_time(&jump, 130);
+    lv_anim_set_playback_time(&jump, 160);
+    lv_anim_start(&jump);
+}
+
+static void set_dino_animation(struct zmk_widget_status *widget, uint8_t wpm) {
+    enum dino_anim_state next_state;
     uint16_t duration;
 
-    if (widget->bongo == NULL) {
+    if (widget->dino == NULL) {
         return;
     }
 
     if (wpm < 5) {
-        next_state = BONGO_ANIM_IDLE;
+        next_state = DINO_ANIM_IDLE;
         duration = 960;
     } else if (wpm < 30) {
-        next_state = BONGO_ANIM_SLOW;
+        next_state = DINO_ANIM_SLOW;
         duration = 200;
     } else if (wpm < 70) {
-        next_state = BONGO_ANIM_MID;
+        next_state = DINO_ANIM_MID;
         duration = 200;
     } else {
-        next_state = BONGO_ANIM_FAST;
-        duration = 200;
+        next_state = DINO_ANIM_FAST;
+        duration = 140;
     }
 
-    if (widget->bongo_anim_state == next_state) {
+    if (widget->dino_anim_state == next_state) {
         return;
     }
 
     switch (next_state) {
-    case BONGO_ANIM_IDLE:
-        lv_animimg_set_src(widget->bongo, SRC(bongo_idle_imgs));
+    case DINO_ANIM_IDLE:
+        lv_animimg_set_src(widget->dino, SRC(dino_idle_imgs));
         break;
-    case BONGO_ANIM_SLOW:
-        lv_animimg_set_src(widget->bongo, SRC(bongo_slow_imgs));
+    case DINO_ANIM_SLOW:
+        lv_animimg_set_src(widget->dino, SRC(dino_slow_imgs));
         break;
-    case BONGO_ANIM_MID:
-        lv_animimg_set_src(widget->bongo, SRC(bongo_mid_imgs));
+    case DINO_ANIM_MID:
+        lv_animimg_set_src(widget->dino, SRC(dino_mid_imgs));
         break;
-    case BONGO_ANIM_FAST:
-        lv_animimg_set_src(widget->bongo, SRC(bongo_fast_imgs));
+    case DINO_ANIM_FAST:
+        lv_animimg_set_src(widget->dino, SRC(dino_fast_imgs));
         break;
     default:
         return;
     }
 
-    lv_animimg_set_duration(widget->bongo, duration);
-    lv_animimg_set_repeat_count(widget->bongo, LV_ANIM_REPEAT_INFINITE);
-    lv_animimg_start(widget->bongo);
-    widget->bongo_anim_state = next_state;
+    lv_animimg_set_duration(widget->dino, duration);
+    lv_animimg_set_repeat_count(widget->dino, LV_ANIM_REPEAT_INFINITE);
+    lv_animimg_start(widget->dino);
+    widget->dino_anim_state = next_state;
 }
 
 static void set_battery_status(struct zmk_widget_status *widget,
@@ -409,7 +427,8 @@ static void set_wpm_status(struct zmk_widget_status *widget, struct wpm_status_s
     }
     widget->state.wpm[WPM_SAMPLES - 1] = state.wpm;
 
-    set_bongo_animation(widget, state.wpm);
+    set_dino_animation(widget, state.wpm);
+    start_dino_jump(widget, state.wpm);
     draw_canvas(widget->obj, widget->cbuf, &widget->state);
 }
 
@@ -437,10 +456,10 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     lv_canvas_set_buffer(canvas, widget->cbuf, VISTA508_DISPLAY_WIDTH, VISTA508_DISPLAY_HEIGHT,
                          LV_IMG_CF_TRUE_COLOR);
 
-    widget->bongo = lv_animimg_create(widget->obj);
-    lv_obj_align(widget->bongo, LV_ALIGN_TOP_LEFT, 94, 44);
-    widget->bongo_anim_state = BONGO_ANIM_NONE;
-    set_bongo_animation(widget, 0);
+    widget->dino = lv_animimg_create(widget->obj);
+    lv_obj_align(widget->dino, LV_ALIGN_TOP_LEFT, DINO_X, DINO_Y);
+    widget->dino_anim_state = DINO_ANIM_NONE;
+    set_dino_animation(widget, 0);
 
     sys_slist_append(&widgets, &widget->node);
     widget_battery_status_init();

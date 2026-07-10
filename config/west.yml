@@ -19,6 +19,6 @@ manifest:
       revision: main
     - name: zmk_driver_azoteq
       remote: beekeeb
-      revision: main
+      revision: master
   self:
     path: config

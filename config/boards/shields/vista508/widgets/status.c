@@ -8,9 +8,12 @@
 #include <stdio.h>
 
 #include <zephyr/kernel.h>
+#include <zephyr/random/random.h>
 
 #include <zephyr/logging/log.h>
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
+
+#include <dt-bindings/zmk/hid_usage.h>
 
 #include <zmk/battery.h>
 #include <zmk/ble.h>
@@ -20,6 +23,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/events/battery_state_changed.h>
 #include <zmk/events/ble_active_profile_changed.h>
 #include <zmk/events/endpoint_changed.h>
+#include <zmk/events/keycode_state_changed.h>
 #include <zmk/events/layer_state_changed.h>
 #include <zmk/events/usb_conn_state_changed.h>
 #include <zmk/events/wpm_state_changed.h>
@@ -41,11 +45,30 @@ LV_IMG_DECLARE(shift_0);
 LV_IMG_DECLARE(opt_0);
 LV_IMG_DECLARE(cmd_0);
 
-LV_IMG_DECLARE(dino_idle);
-LV_IMG_DECLARE(dino_run1);
-LV_IMG_DECLARE(dino_run2);
-
-#define SRC(array) (const void **)array, (sizeof(array) / sizeof(array[0]))
+LV_IMG_DECLARE(clawd_00);
+LV_IMG_DECLARE(clawd_01);
+LV_IMG_DECLARE(clawd_02);
+LV_IMG_DECLARE(clawd_03);
+LV_IMG_DECLARE(clawd_04);
+LV_IMG_DECLARE(clawd_05);
+LV_IMG_DECLARE(clawd_06);
+LV_IMG_DECLARE(clawd_07);
+LV_IMG_DECLARE(clawd_08);
+LV_IMG_DECLARE(clawd_09);
+LV_IMG_DECLARE(clawd_10);
+LV_IMG_DECLARE(clawd_11);
+LV_IMG_DECLARE(clawd_12);
+LV_IMG_DECLARE(clawd_13);
+LV_IMG_DECLARE(clawd_14);
+LV_IMG_DECLARE(clawd_15);
+LV_IMG_DECLARE(clawd_17);
+LV_IMG_DECLARE(clawd_18);
+LV_IMG_DECLARE(clawd_19);
+LV_IMG_DECLARE(clawd_20);
+LV_IMG_DECLARE(clawd_21);
+LV_IMG_DECLARE(clawd_22);
+LV_IMG_DECLARE(clawd_23);
+LV_IMG_DECLARE(clawd_24);
 
 #define WPM_CHART_X 8
 #define WPM_CHART_Y 82
@@ -57,29 +80,15 @@ LV_IMG_DECLARE(dino_run2);
 #define DINO_Y 44
 #define DINO_JUMP_Y 30
 
-enum dino_anim_state {
-    DINO_ANIM_NONE,
-    DINO_ANIM_IDLE,
-    DINO_ANIM_SLOW,
-    DINO_ANIM_MID,
-    DINO_ANIM_FAST,
+static const lv_img_dsc_t *clawd_icons[] = {
+    &clawd_00, &clawd_01, &clawd_02, &clawd_03, &clawd_04,
+    &clawd_05, &clawd_06, &clawd_07, &clawd_08, &clawd_09,
+    &clawd_10, &clawd_11, &clawd_12, &clawd_13, &clawd_14,
+    &clawd_15, &clawd_17, &clawd_18, &clawd_19,
+    &clawd_20, &clawd_21, &clawd_22, &clawd_23, &clawd_24,
 };
 
-static const lv_img_dsc_t *dino_idle_imgs[] = {
-    &dino_idle,
-};
-static const lv_img_dsc_t *dino_slow_imgs[] = {
-    &dino_run1,
-    &dino_run2,
-};
-static const lv_img_dsc_t *dino_mid_imgs[] = {
-    &dino_run1,
-    &dino_run2,
-};
-static const lv_img_dsc_t *dino_fast_imgs[] = {
-    &dino_run1,
-    &dino_run2,
-};
+#define CLAWD_ICON_COUNT (sizeof(clawd_icons) / sizeof(clawd_icons[0]))
 
 struct output_status_state {
     struct zmk_endpoint_instance selected_endpoint;
@@ -261,6 +270,31 @@ static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status
 
 static void set_dino_y(void *dino, int32_t y) { lv_obj_set_y((lv_obj_t *)dino, y); }
 
+static void set_clawd_icon(struct zmk_widget_status *widget, uint8_t index) {
+    if (widget->dino == NULL || index >= CLAWD_ICON_COUNT) {
+        return;
+    }
+
+    widget->clawd_icon_index = index;
+    lv_img_set_src(widget->dino, clawd_icons[index]);
+}
+
+static void set_random_clawd_icon(struct zmk_widget_status *widget) {
+    uint8_t next_index;
+
+    if (CLAWD_ICON_COUNT <= 1) {
+        set_clawd_icon(widget, 0);
+        return;
+    }
+
+    next_index = sys_rand32_get() % (CLAWD_ICON_COUNT - 1);
+    if (next_index >= widget->clawd_icon_index) {
+        next_index++;
+    }
+
+    set_clawd_icon(widget, next_index);
+}
+
 static void start_dino_jump(struct zmk_widget_status *widget, uint8_t wpm) {
     if (widget->dino == NULL || wpm == 0 || lv_obj_get_y(widget->dino) != DINO_Y) {
         return;
@@ -274,55 +308,6 @@ static void start_dino_jump(struct zmk_widget_status *widget, uint8_t wpm) {
     lv_anim_set_time(&jump, 130);
     lv_anim_set_playback_time(&jump, 160);
     lv_anim_start(&jump);
-}
-
-static void set_dino_animation(struct zmk_widget_status *widget, uint8_t wpm) {
-    enum dino_anim_state next_state;
-    uint16_t duration;
-
-    if (widget->dino == NULL) {
-        return;
-    }
-
-    if (wpm < 5) {
-        next_state = DINO_ANIM_IDLE;
-        duration = 960;
-    } else if (wpm < 30) {
-        next_state = DINO_ANIM_SLOW;
-        duration = 200;
-    } else if (wpm < 70) {
-        next_state = DINO_ANIM_MID;
-        duration = 200;
-    } else {
-        next_state = DINO_ANIM_FAST;
-        duration = 140;
-    }
-
-    if (widget->dino_anim_state == next_state) {
-        return;
-    }
-
-    switch (next_state) {
-    case DINO_ANIM_IDLE:
-        lv_animimg_set_src(widget->dino, SRC(dino_idle_imgs));
-        break;
-    case DINO_ANIM_SLOW:
-        lv_animimg_set_src(widget->dino, SRC(dino_slow_imgs));
-        break;
-    case DINO_ANIM_MID:
-        lv_animimg_set_src(widget->dino, SRC(dino_mid_imgs));
-        break;
-    case DINO_ANIM_FAST:
-        lv_animimg_set_src(widget->dino, SRC(dino_fast_imgs));
-        break;
-    default:
-        return;
-    }
-
-    lv_animimg_set_duration(widget->dino, duration);
-    lv_animimg_set_repeat_count(widget->dino, LV_ANIM_REPEAT_INFINITE);
-    lv_animimg_start(widget->dino);
-    widget->dino_anim_state = next_state;
 }
 
 static void set_battery_status(struct zmk_widget_status *widget,
@@ -427,7 +412,6 @@ static void set_wpm_status(struct zmk_widget_status *widget, struct wpm_status_s
     }
     widget->state.wpm[WPM_SAMPLES - 1] = state.wpm;
 
-    set_dino_animation(widget, state.wpm);
     start_dino_jump(widget, state.wpm);
     draw_canvas(widget->obj, widget->cbuf, &widget->state);
 }
@@ -447,6 +431,23 @@ ZMK_DISPLAY_WIDGET_LISTENER(widget_wpm_status, struct wpm_status_state, wpm_stat
                             wpm_status_get_state)
 ZMK_SUBSCRIPTION(widget_wpm_status, zmk_wpm_state_changed);
 
+static int clawd_icon_keycode_listener(const zmk_event_t *eh) {
+    const struct zmk_keycode_state_changed *ev = as_zmk_keycode_state_changed(eh);
+
+    if (ev == NULL || !ev->state || ev->usage_page != HID_USAGE_KEY ||
+        ev->keycode != HID_USAGE_KEY_KEYBOARD_SPACEBAR) {
+        return 0;
+    }
+
+    struct zmk_widget_status *widget;
+    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_random_clawd_icon(widget); }
+
+    return 0;
+}
+
+ZMK_LISTENER(widget_clawd_icon, clawd_icon_keycode_listener);
+ZMK_SUBSCRIPTION(widget_clawd_icon, zmk_keycode_state_changed);
+
 int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     widget->obj = lv_obj_create(parent);
     lv_obj_set_size(widget->obj, VISTA508_DISPLAY_WIDTH, VISTA508_DISPLAY_HEIGHT);
@@ -456,10 +457,9 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     lv_canvas_set_buffer(canvas, widget->cbuf, VISTA508_DISPLAY_WIDTH, VISTA508_DISPLAY_HEIGHT,
                          LV_IMG_CF_TRUE_COLOR);
 
-    widget->dino = lv_animimg_create(widget->obj);
+    widget->dino = lv_img_create(widget->obj);
     lv_obj_align(widget->dino, LV_ALIGN_TOP_LEFT, DINO_X, DINO_Y);
-    widget->dino_anim_state = DINO_ANIM_NONE;
-    set_dino_animation(widget, 0);
+    set_clawd_icon(widget, 0);
 
     sys_slist_append(&widgets, &widget->node);
     widget_battery_status_init();

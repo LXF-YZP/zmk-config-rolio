@@ -15,7 +15,7 @@ struct zmk_widget_status {
     sys_snode_t node;
     lv_obj_t *obj;
     lv_obj_t *dino;
-    int dino_anim_state;
+    uint8_t clawd_icon_index;
     lv_color_t cbuf[VISTA508_DISPLAY_WIDTH * VISTA508_DISPLAY_HEIGHT];
     struct status_state state;
 };

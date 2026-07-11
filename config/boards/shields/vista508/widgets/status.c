@@ -115,11 +115,6 @@ static void draw_text(lv_obj_t *canvas, lv_coord_t x, lv_coord_t y, lv_coord_t w
     lv_canvas_draw_text(canvas, x, y, width, &label_dsc, text);
 }
 
-static void draw_heading(lv_obj_t *canvas, lv_coord_t y, const char *label, const char *value) {
-    draw_text(canvas, 8, y, 38, &lv_font_montserrat_16, LV_TEXT_ALIGN_LEFT, label);
-    draw_text(canvas, 50, y, 42, &lv_font_montserrat_16, LV_TEXT_ALIGN_LEFT, value);
-}
-
 static void draw_wpm_grid(lv_obj_t *canvas) {
     lv_draw_line_dsc_t line_dsc;
     init_line_dsc(&line_dsc, LVGL_FOREGROUND, 1);
@@ -205,7 +200,8 @@ static void draw_wpm(lv_obj_t *canvas, const struct status_state *state) {
     uint8_t current_wpm = state->wpm[WPM_SAMPLES - 1];
 
     snprintf(text, sizeof(text), "%d", current_wpm);
-    draw_heading(canvas, 50, "WPM", text);
+    draw_text(canvas, 8, 50, 48, &lv_font_montserrat_16, LV_TEXT_ALIGN_LEFT, "WPM");
+    draw_text(canvas, 62, 50, 30, &lv_font_montserrat_16, LV_TEXT_ALIGN_LEFT, text);
     draw_wpm_grid(canvas);
     draw_wpm_graph(canvas, state);
 }

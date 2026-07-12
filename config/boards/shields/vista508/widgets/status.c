@@ -45,6 +45,7 @@ LV_IMG_DECLARE(control_0);
 LV_IMG_DECLARE(shift_0);
 LV_IMG_DECLARE(opt_0);
 LV_IMG_DECLARE(cmd_0);
+LV_IMG_DECLARE(dog_uptime);
 
 LV_IMG_DECLARE(clawd_00);
 LV_IMG_DECLARE(clawd_01);
@@ -81,8 +82,10 @@ LV_IMG_DECLARE(clawd_24);
 #define DINO_Y 44
 #define DINO_JUMP_Y 30
 #define UPTIME_X 94
-#define UPTIME_Y 30
+#define UPTIME_Y 28
 #define UPTIME_WIDTH 50
+#define UPTIME_DOG_X 103
+#define UPTIME_DOG_Y 0
 #define UPTIME_TOGGLE_FIRST_POSITION 0
 #define UPTIME_TOGGLE_LAST_POSITION 11
 
@@ -215,6 +218,10 @@ static void draw_uptime(lv_obj_t *canvas, const struct status_state *state) {
     char text[8] = {};
     uint32_t hours;
     uint32_t minutes;
+    lv_draw_img_dsc_t img_dsc;
+
+    lv_draw_img_dsc_init(&img_dsc);
+    lv_canvas_draw_img(canvas, UPTIME_DOG_X, UPTIME_DOG_Y, &dog_uptime, &img_dsc);
 
     if (!state->show_uptime) {
         return;

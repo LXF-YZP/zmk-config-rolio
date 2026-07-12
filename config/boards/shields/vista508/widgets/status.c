@@ -25,6 +25,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/events/endpoint_changed.h>
 #include <zmk/events/keycode_state_changed.h>
 #include <zmk/events/layer_state_changed.h>
+#include <zmk/events/position_state_changed.h>
 #include <zmk/events/usb_conn_state_changed.h>
 #include <zmk/events/wpm_state_changed.h>
 #include <zmk/keymap.h>
@@ -79,6 +80,11 @@ LV_IMG_DECLARE(clawd_24);
 #define DINO_X 99
 #define DINO_Y 44
 #define DINO_JUMP_Y 30
+#define UPTIME_X 94
+#define UPTIME_Y 30
+#define UPTIME_WIDTH 50
+#define UPTIME_TOGGLE_FIRST_POSITION 0
+#define UPTIME_TOGGLE_LAST_POSITION 11
 
 static const lv_img_dsc_t *clawd_icons[] = {
     &clawd_00, &clawd_01, &clawd_02, &clawd_03, &clawd_04,
@@ -107,6 +113,16 @@ struct wpm_status_state {
 };
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
+
+static bool uptime_visible = true;
+static bool uptime_first_position_pressed;
+static bool uptime_last_position_pressed;
+static bool uptime_toggle_armed;
+static bool uptime_status_started;
+
+static void uptime_status_work_cb(struct k_work *work);
+
+K_WORK_DELAYABLE_DEFINE(uptime_status_work, uptime_status_work_cb);
 
 static void draw_text(lv_obj_t *canvas, lv_coord_t x, lv_coord_t y, lv_coord_t width,
                       const lv_font_t *font, lv_text_align_t align, const char *text) {
@@ -195,6 +211,22 @@ static void draw_battery_level(lv_obj_t *canvas, const struct status_state *stat
     }
 }
 
+static void draw_uptime(lv_obj_t *canvas, const struct status_state *state) {
+    char text[8] = {};
+    uint32_t hours;
+    uint32_t minutes;
+
+    if (!state->show_uptime) {
+        return;
+    }
+
+    hours = (state->uptime_minutes / 60U) % 100U;
+    minutes = state->uptime_minutes % 60U;
+    snprintf(text, sizeof(text), "%02u:%02u", (unsigned int)hours, (unsigned int)minutes);
+    draw_text(canvas, UPTIME_X, UPTIME_Y, UPTIME_WIDTH, &lv_font_montserrat_12,
+              LV_TEXT_ALIGN_CENTER, text);
+}
+
 static void draw_wpm(lv_obj_t *canvas, const struct status_state *state) {
     char text[8] = {};
     uint8_t current_wpm = state->wpm[WPM_SAMPLES - 1];
@@ -258,10 +290,31 @@ static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status
 
     draw_output(canvas, state);
     draw_battery_level(canvas, state);
+    draw_uptime(canvas, state);
     draw_wpm(canvas, state);
     draw_modifiers(canvas);
     draw_profiles(canvas, state);
     draw_layer(canvas, state);
+}
+
+static uint32_t get_uptime_minutes(void) { return (uint32_t)(k_uptime_get() / 60000); }
+
+static void refresh_uptime_status(void) {
+    struct zmk_widget_status *widget;
+    uint32_t uptime_minutes = get_uptime_minutes();
+
+    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) {
+        widget->state.show_uptime = uptime_visible;
+        widget->state.uptime_minutes = uptime_minutes;
+        draw_canvas(widget->obj, widget->cbuf, &widget->state);
+    }
+}
+
+static void uptime_status_work_cb(struct k_work *work) {
+    ARG_UNUSED(work);
+
+    refresh_uptime_status();
+    k_work_schedule_for_queue(zmk_display_work_q(), &uptime_status_work, K_MINUTES(1));
 }
 
 static void set_dino_y(void *dino, int32_t y) { lv_obj_set_y((lv_obj_t *)dino, y); }
@@ -444,6 +497,44 @@ static int clawd_icon_keycode_listener(const zmk_event_t *eh) {
 ZMK_LISTENER(widget_clawd_icon, clawd_icon_keycode_listener);
 ZMK_SUBSCRIPTION(widget_clawd_icon, zmk_keycode_state_changed);
 
+static void toggle_uptime_visibility(void) {
+    uptime_visible = !uptime_visible;
+    k_work_reschedule_for_queue(zmk_display_work_q(), &uptime_status_work, K_NO_WAIT);
+}
+
+static int uptime_toggle_position_listener(const zmk_event_t *eh) {
+    const struct zmk_position_state_changed *ev = as_zmk_position_state_changed(eh);
+
+    if (ev == NULL) {
+        return 0;
+    }
+
+    switch (ev->position) {
+    case UPTIME_TOGGLE_FIRST_POSITION:
+        uptime_first_position_pressed = ev->state;
+        break;
+    case UPTIME_TOGGLE_LAST_POSITION:
+        uptime_last_position_pressed = ev->state;
+        break;
+    default:
+        return 0;
+    }
+
+    if (uptime_first_position_pressed && uptime_last_position_pressed) {
+        if (!uptime_toggle_armed) {
+            uptime_toggle_armed = true;
+            toggle_uptime_visibility();
+        }
+    } else {
+        uptime_toggle_armed = false;
+    }
+
+    return 0;
+}
+
+ZMK_LISTENER(widget_uptime_toggle, uptime_toggle_position_listener);
+ZMK_SUBSCRIPTION(widget_uptime_toggle, zmk_position_state_changed);
+
 int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     widget->obj = lv_obj_create(parent);
     lv_obj_set_size(widget->obj, VISTA508_DISPLAY_WIDTH, VISTA508_DISPLAY_HEIGHT);
@@ -455,6 +546,8 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
 
     widget->dino = lv_img_create(widget->obj);
     lv_obj_align(widget->dino, LV_ALIGN_TOP_LEFT, DINO_X, DINO_Y);
+    widget->state.show_uptime = uptime_visible;
+    widget->state.uptime_minutes = get_uptime_minutes();
     set_clawd_icon(widget, 0);
 
     sys_slist_append(&widgets, &widget->node);
@@ -462,6 +555,11 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     widget_output_status_init();
     widget_layer_status_init();
     widget_wpm_status_init();
+
+    if (!uptime_status_started) {
+        uptime_status_started = true;
+        k_work_schedule_for_queue(zmk_display_work_q(), &uptime_status_work, K_MINUTES(1));
+    }
 
     draw_canvas(widget->obj, widget->cbuf, &widget->state);
 

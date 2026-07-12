@@ -88,9 +88,9 @@ RC(2,0) RC(2,1) RC(2,2) RC(2,3) RC(2,4) RC(2,5)                    RC(2,6) RC(2,
         prechargep = <0x22>;
     };
 
-    tps43: iqs5xx@74 {
+    tps43: trackpad@74 {
         status = "disabled";
-        compatible = "azoteq,iqs5xx";
+        compatible = "azoteq,tps43";
         reg = <0x74>;
     };
 };

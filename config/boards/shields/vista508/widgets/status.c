@@ -52,7 +52,7 @@ LV_IMG_DECLARE(wizard_charging_3);
 #define WPM_CHART_PADDING 4
 #define WPM_CHART_MAX 100
 #define WIZARD_X 104
-#define WIZARD_Y 0
+#define WIZARD_Y 4
 #define WIZARD_ANIMATION_DURATION_MS 800
 
 static const lv_img_dsc_t *wizard_charging_frames[] = {

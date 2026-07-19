@@ -30,8 +30,6 @@ struct status_state {
     uint8_t layer_index;
     const char *layer_label;
     uint8_t wpm[WPM_SAMPLES];
-    bool show_uptime;
-    uint32_t uptime_minutes;
 #else
     bool connected;
 #endif

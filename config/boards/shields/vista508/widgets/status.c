@@ -25,6 +25,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/events/usb_conn_state_changed.h>
 #include <zmk/events/wpm_state_changed.h>
 #include <zmk/keymap.h>
+#include <zmk/hid.h>
 #include <zmk/usb.h>
 #include <zmk/wpm.h>
 
@@ -90,12 +91,13 @@ struct wpm_status_state {
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 static bool wpm_status_started;
-static uint8_t active_modifiers;
-static uint8_t modifier_counts[8];
+static uint8_t implicit_modifier_counts[8];
 
 static void wpm_status_work_cb(struct k_work *work);
+static void modifier_status_work_cb(struct k_work *work);
 
 K_WORK_DELAYABLE_DEFINE(wpm_status_work, wpm_status_work_cb);
+K_WORK_DELAYABLE_DEFINE(modifier_status_work, modifier_status_work_cb);
 
 static void draw_text(lv_obj_t *canvas, lv_coord_t x, lv_coord_t y, lv_coord_t width,
                       const lv_font_t *font, lv_text_align_t align, const char *text) {
@@ -357,7 +359,7 @@ ZMK_DISPLAY_WIDGET_LISTENER(widget_layer_status, struct layer_status_state, laye
 
 ZMK_SUBSCRIPTION(widget_layer_status, zmk_layer_state_changed);
 
-static void update_active_modifiers(uint8_t modifiers, bool pressed) {
+static void update_implicit_modifiers(uint8_t modifiers, bool pressed) {
     for (uint8_t bit = 0; bit < 8; bit++) {
         uint8_t flag = BIT(bit);
         if (!(modifiers & flag)) {
@@ -365,40 +367,60 @@ static void update_active_modifiers(uint8_t modifiers, bool pressed) {
         }
 
         if (pressed) {
-            modifier_counts[bit]++;
-            active_modifiers |= flag;
-        } else if (modifier_counts[bit] > 0 && --modifier_counts[bit] == 0) {
-            active_modifiers &= ~flag;
+            implicit_modifier_counts[bit]++;
+        } else if (implicit_modifier_counts[bit] > 0) {
+            implicit_modifier_counts[bit]--;
         }
     }
 }
 
+static uint8_t get_implicit_modifiers(void) {
+    uint8_t modifiers = 0;
+
+    for (uint8_t bit = 0; bit < 8; bit++) {
+        if (implicit_modifier_counts[bit] > 0) {
+            modifiers |= BIT(bit);
+        }
+    }
+
+    return modifiers;
+}
+
+static void refresh_modifier_status(void) {
+    struct zmk_widget_status *widget;
+    uint8_t modifiers = zmk_hid_get_explicit_mods() | get_implicit_modifiers();
+
+    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) {
+        widget->state.modifiers = modifiers;
+        draw_canvas(widget->obj, widget->cbuf, &widget->state);
+    }
+}
+
+static void modifier_status_work_cb(struct k_work *work) {
+    ARG_UNUSED(work);
+
+    refresh_modifier_status();
+}
+
 static int modifier_status_listener(const zmk_event_t *eh) {
     const struct zmk_keycode_state_changed *ev = as_zmk_keycode_state_changed(eh);
-    uint8_t modifiers;
+    bool is_modifier_key;
 
     if (ev == NULL || ev->usage_page != HID_USAGE_KEY) {
         return 0;
     }
 
-    if (ev->keycode >= HID_USAGE_KEY_KEYBOARD_LEFTCONTROL &&
-        ev->keycode <= HID_USAGE_KEY_KEYBOARD_RIGHT_GUI) {
-        modifiers = BIT(ev->keycode - HID_USAGE_KEY_KEYBOARD_LEFTCONTROL);
-    } else {
-        modifiers = ev->implicit_modifiers | ev->explicit_modifiers;
-    }
-
-    if (modifiers == 0) {
+    is_modifier_key = ev->keycode >= HID_USAGE_KEY_KEYBOARD_LEFTCONTROL &&
+                      ev->keycode <= HID_USAGE_KEY_KEYBOARD_RIGHT_GUI;
+    if (!is_modifier_key && ev->implicit_modifiers == 0) {
         return 0;
     }
 
-    update_active_modifiers(modifiers, ev->state);
-
-    struct zmk_widget_status *widget;
-    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) {
-        widget->state.modifiers = active_modifiers;
-        draw_canvas(widget->obj, widget->cbuf, &widget->state);
+    if (!is_modifier_key) {
+        update_implicit_modifiers(ev->implicit_modifiers, ev->state);
     }
+
+    k_work_reschedule_for_queue(zmk_display_work_q(), &modifier_status_work, K_MSEC(1));
 
     return 0;
 }
@@ -465,7 +487,7 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     lv_animimg_start(widget->wizard);
 
     sys_slist_append(&widgets, &widget->node);
-    widget->state.modifiers = active_modifiers;
+    widget->state.modifiers = zmk_hid_get_explicit_mods() | get_implicit_modifiers();
     widget_battery_status_init();
     widget_output_status_init();
     widget_layer_status_init();

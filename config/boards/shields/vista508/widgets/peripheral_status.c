@@ -111,7 +111,7 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
 
     lv_obj_t *art = lv_img_create(widget->obj);
 
-    uint32_t random = sys_rand32_get() / (4294967295 / image_count);
+    uint32_t random = sys_rand32_get() % image_count;
     lv_img_set_src(art, &image_list[random]);
     lv_obj_align(art, LV_ALIGN_TOP_LEFT, 0, 21);
 

@@ -41,6 +41,10 @@
     status = "okay";
 };
 
+&oled {
+    status = "disabled";
+};
+
 &tps43 {
     status = "okay";
 

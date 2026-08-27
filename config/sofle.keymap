@@ -38,7 +38,7 @@
        &kp GRAVE      &kp Q            &kp W           &kp E           &kp R           &kp T     /*|                                 |*/  &kp Y          &kp U           &kp I           &kp O           &kp P          &mt LC(BSPC) BSPC
        &lt NUMBER TAB &kp A            &kp S           &kp D           &kp F           &kp G     /*├─────────────╮     ╭─────────────┤*/  &kp H          &kp J           &kp K           &kp L           &kp SEMI       &kp SQT
        &lt FN LSHIFT  &kp Z            &kp X           &kp C           &kp V           &kp B                                              &kp N          &kp M           &kp COMMA       &kp DOT         &kp FSLH       &lt HOTKEY RSHFT
-       &kp LCTRL      &kp LALT         &kp LGUI        &kp SPACE        &kp ENTER       &mo NUMBER                                             &mo FN         &kp LEFT       &kp DOWN        &kp UP          &kp RIGHT      &kp RCTRL
+                       &kp LALT         &kp LGUI        &kp SPACE        &kp ENTER       &mo NUMBER                                             &mo FN         &kp LEFT       &kp DOWN        &kp UP          &kp RIGHT
             >;
         };
 
@@ -51,8 +51,8 @@
        &kp UNDER       &kp N1          &kp N2          &kp N3          &kp N4          &kp N5    /*|                                 |*/  &kp N6         &kp N7          &kp N8          &kp N9          &kp N0          &kp DEL
        ___             &kp EXCL        &kp AT          &kp HASH        &kp DLLR        &kp PRCNT /*├─────────────╮     ╭─────────────┤*/  &kp CARET      &kp AMPERSAND   &kp STAR        &kp LPAR        &kp RPAR        &kp MINUS
        ___             &kp LG(DOT)     &kp LEFT_BRACE  &kp RIGHT_BRACE &kp PIPE        &kp EQUAL                                          &kp PRCNT      &kp PLUS        &kp LBKT        &kp RBKT        &kp BACKSLASH   ___
-       ___             ___             ___             ___             ___             ___                                              ___             ___             ___             ___             ___             ___
-       ___             ___             ___             ___             ___             ___                                              ___             ___             ___             ___             ___             ___
+                       ___             ___             ___             ___             ___                                              ___             ___             ___             ___             ___
+                       ___             ___             ___             ___             ___                                              ___             ___             ___             ___             ___
             >;
         };
 
@@ -78,7 +78,7 @@
       &out OUT_TOG     ___     ___      ___     ___      ___ /*|                                 |*/   &kp N6         &kp N7          &kp N8          &kp N9          &kp N0          &soft_off
       ___              ___             ___             ___             ___             ___        /*├─────────────╮     ╭─────────────┤*/   ___            &kp N4          &kp N5          &kp N6          ___             ___
       ___              &bl BL_TOG      ___   &bl BL_DEC      &bl BL_TOG      &bl BL_INC                                           ___            &kp N1          &kp N2          &kp N3          ___             ___
-       ___              ___             ___             ___             ___             ___                                            ___            ___             ___             ___             ___             ___
+                        ___             ___             ___             ___             ___                                            ___            ___             ___             ___             ___
        ___              ___             ___             ___             ___             ___                                            ___            ___             ___             ___             ___             ___
             >;
         };

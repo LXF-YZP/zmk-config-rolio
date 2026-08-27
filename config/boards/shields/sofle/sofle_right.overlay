@@ -11,13 +11,12 @@
 };
 
 &kscan0 {
-    // Schematic nets row0 through row4.
+    // Schematic nets row0 through row3.
     row-gpios
         = <&gpio0 5 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
         , <&gpio0 30 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
         , <&gpio0 31 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
         , <&gpio0 10 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
-        , <&gpio0 9 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
         ;
 
     // Schematic nets col0 through col5.

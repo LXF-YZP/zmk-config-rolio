@@ -4,7 +4,8 @@
  * SPDX-License-Identifier: MIT
  */
 
-// Enable SPI for the Vista508 MIP display (SCK=P0.20, MOSI=P0.17, CS=P0.06).
+// Left-hand Sharp LS013B7DH03 (128x128) on the nice!view SPI header.
+// SCK=P0.20, MOSI=P0.17, CS=P0.06 (active high). DISP/EXTMODE are wired on the PCB.
 &pinctrl {
     spi0_default: spi0_default {
         group1 {
@@ -44,17 +45,17 @@ nice_view_spi: &spi0 {
 
 &nice_view_spi {
     status = "okay";
-    vista508: ls0xx@0 {
+    ls013b7dh03: ls0xx@0 {
         compatible = "sharp,ls0xx";
         spi-max-frequency = <1000000>;
         reg = <0>;
-        width = <144>;
-        height = <168>;
+        width = <128>;
+        height = <128>;
     };
 };
 
 / {
     chosen {
-        zephyr,display = &vista508;
+        zephyr,display = &ls013b7dh03;
     };
 };

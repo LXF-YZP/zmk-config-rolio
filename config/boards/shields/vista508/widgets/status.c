@@ -55,15 +55,15 @@ LV_IMG_DECLARE(wizard_charging_1);
 LV_IMG_DECLARE(wizard_charging_2);
 LV_IMG_DECLARE(wizard_charging_3);
 
-#define WPM_CHART_X 8
-#define WPM_CHART_Y 82
+#define WPM_CHART_X 6
+#define WPM_CHART_Y 56
 #define WPM_CHART_WIDTH 80
-#define WPM_CHART_HEIGHT 40
+#define WPM_CHART_HEIGHT 32
 #define WPM_CHART_PADDING 4
 #define WPM_CHART_MAX 100
 #define WPM_SAMPLE_INTERVAL_MS 1000
-#define WIZARD_X 104
-#define WIZARD_Y 4
+#define WIZARD_X 94
+#define WIZARD_Y 2
 #define WIZARD_ANIMATION_DURATION_MS 800
 
 static const lv_img_dsc_t *wizard_charging_frames[] = {
@@ -150,19 +150,19 @@ static void draw_output(lv_obj_t *canvas, const struct status_state *state) {
     lv_draw_img_dsc_t img_dsc;
     lv_draw_img_dsc_init(&img_dsc);
 
-    draw_text(canvas, 8, 6, 38, &lv_font_montserrat_16, LV_TEXT_ALIGN_LEFT, "SIG");
+    draw_text(canvas, 6, 2, 38, &lv_font_montserrat_16, LV_TEXT_ALIGN_LEFT, "SIG");
 
     switch (state->selected_endpoint.transport) {
     case ZMK_TRANSPORT_USB:
-        lv_canvas_draw_img(canvas, 56, 8, &usb, &img_dsc);
+        lv_canvas_draw_img(canvas, 50, 4, &usb, &img_dsc);
         break;
     case ZMK_TRANSPORT_BLE:
         if (!state->active_profile_bonded) {
-            lv_canvas_draw_img(canvas, 55, 6, &bt_unbonded, &img_dsc);
+            lv_canvas_draw_img(canvas, 48, 2, &bt_unbonded, &img_dsc);
         } else if (state->active_profile_connected) {
-            lv_canvas_draw_img(canvas, 59, 6, &bt, &img_dsc);
+            lv_canvas_draw_img(canvas, 52, 2, &bt, &img_dsc);
         } else {
-            lv_canvas_draw_img(canvas, 59, 6, &bt_no_signal, &img_dsc);
+            lv_canvas_draw_img(canvas, 52, 2, &bt_no_signal, &img_dsc);
         }
         break;
     }
@@ -171,18 +171,18 @@ static void draw_output(lv_obj_t *canvas, const struct status_state *state) {
 static void draw_battery_level(lv_obj_t *canvas, const struct status_state *state) {
     char text[8] = {};
 
-    draw_text(canvas, 8, 28, 38, &lv_font_montserrat_16, LV_TEXT_ALIGN_LEFT, "BAT");
+    draw_text(canvas, 6, 20, 38, &lv_font_montserrat_16, LV_TEXT_ALIGN_LEFT, "BAT");
 
     if (state->charging) {
         snprintf(text, sizeof(text), "%d", state->battery);
-        draw_text(canvas, 50, 28, 32, &lv_font_montserrat_16, LV_TEXT_ALIGN_LEFT, text);
+        draw_text(canvas, 46, 20, 32, &lv_font_montserrat_16, LV_TEXT_ALIGN_LEFT, text);
 
         lv_draw_img_dsc_t img_dsc;
         lv_draw_img_dsc_init(&img_dsc);
-        lv_canvas_draw_img(canvas, 79, 32, &bolt, &img_dsc);
+        lv_canvas_draw_img(canvas, 75, 24, &bolt, &img_dsc);
     } else {
         snprintf(text, sizeof(text), "%d%%", state->battery);
-        draw_text(canvas, 50, 28, 44, &lv_font_montserrat_16, LV_TEXT_ALIGN_LEFT, text);
+        draw_text(canvas, 46, 20, 44, &lv_font_montserrat_16, LV_TEXT_ALIGN_LEFT, text);
     }
 }
 
@@ -191,8 +191,8 @@ static void draw_wpm(lv_obj_t *canvas, const struct status_state *state) {
     uint8_t current_wpm = state->wpm[WPM_SAMPLES - 1];
 
     snprintf(text, sizeof(text), "%d", current_wpm);
-    draw_text(canvas, 8, 50, 48, &lv_font_montserrat_16, LV_TEXT_ALIGN_LEFT, "WPM");
-    draw_text(canvas, 62, 50, 30, &lv_font_montserrat_16, LV_TEXT_ALIGN_LEFT, text);
+    draw_text(canvas, 6, 38, 48, &lv_font_montserrat_16, LV_TEXT_ALIGN_LEFT, "WPM");
+    draw_text(canvas, 56, 38, 30, &lv_font_montserrat_16, LV_TEXT_ALIGN_LEFT, text);
     draw_wpm_grid(canvas);
     draw_wpm_graph(canvas, state);
 }
@@ -201,16 +201,16 @@ static void draw_modifiers(lv_obj_t *canvas, const struct status_state *state) {
     lv_draw_img_dsc_t img_dsc;
     lv_draw_img_dsc_init(&img_dsc);
 
-    lv_canvas_draw_img(canvas, 98, 88,
+    lv_canvas_draw_img(canvas, 94, 78,
                        state->modifiers & (MOD_LCTL | MOD_RCTL) ? &control_white_0 : &control_0,
                        &img_dsc);
-    lv_canvas_draw_img(canvas, 114, 88,
+    lv_canvas_draw_img(canvas, 110, 78,
                        state->modifiers & (MOD_LSFT | MOD_RSFT) ? &shift_white_0 : &shift_0,
                        &img_dsc);
-    lv_canvas_draw_img(canvas, 98, 104,
+    lv_canvas_draw_img(canvas, 94, 92,
                        state->modifiers & (MOD_LALT | MOD_RALT) ? &opt_white_0 : &opt_0,
                        &img_dsc);
-    lv_canvas_draw_img(canvas, 114, 104,
+    lv_canvas_draw_img(canvas, 110, 92,
                        state->modifiers & (MOD_LGUI | MOD_RGUI) ? &cmd_white_0 : &cmd_0,
                        &img_dsc);
 }
@@ -220,7 +220,7 @@ static void draw_profiles(lv_obj_t *canvas, const struct status_state *state) {
     lv_draw_img_dsc_init(&img_dsc);
 
     for (int i = 0; i < 5; i++) {
-        lv_canvas_draw_img(canvas, 36 + i * 14, 128,
+        lv_canvas_draw_img(canvas, 10 + i * 14, 90,
                            i == state->active_profile_index ? &profile_active : &profile,
                            &img_dsc);
     }
@@ -235,7 +235,7 @@ static void draw_layer(lv_obj_t *canvas, const struct status_state *state) {
         snprintf(text, sizeof(text), "%s", state->layer_label);
     }
 
-    draw_text(canvas, 8, 148, VISTA508_DISPLAY_WIDTH - 16, &lv_font_montserrat_16,
+    draw_text(canvas, 6, 109, VISTA508_DISPLAY_WIDTH - 12, &lv_font_montserrat_16,
               LV_TEXT_ALIGN_CENTER, text);
 }
 
@@ -250,9 +250,9 @@ static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status
 
     lv_draw_line_dsc_t line_dsc;
     init_line_dsc(&line_dsc, LVGL_FOREGROUND, 1);
-    lv_point_t top_rule[2] = {{8, 74}, {88, 74}};
+    lv_point_t top_rule[2] = {{6, 52}, {86, 52}};
     lv_canvas_draw_line(canvas, top_rule, 2, &line_dsc);
-    lv_point_t bottom_rule[2] = {{8, 144}, {136, 144}};
+    lv_point_t bottom_rule[2] = {{6, 106}, {86, 106}};
     lv_canvas_draw_line(canvas, bottom_rule, 2, &line_dsc);
 
     draw_output(canvas, state);

@@ -1,6 +1,6 @@
-# Vista508
+# LS013B7DH03
 
-The Vista508 is a low-power, high refresh rate display meant to replace I2C OLEDs traditionally used.
+Left-hand Sharp Memory LCD, 128×128. It uses the same nice!view SPI header as the previous Vista508 shield (SCK, MOSI, CS).
 
 This shield requires that an `&nice_view_spi` labeled SPI bus is provided with _at least_ MOSI, SCK, and CS pins defined.
 

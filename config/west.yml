@@ -6,10 +6,13 @@ manifest:
       url-base: https://github.com/mctechnology17
     - name: beekeeb
       url-base: https://github.com/beekeeb
+    - name: carrefinho
+      url-base: https://github.com/carrefinho
   projects:
     - name: zmk
       remote: zmkfirmware
-      revision: v0.2
+      # feat/new-status-screens requires the Zephyr 4.1 based ZMK main branch.
+      revision: main
       import: app/west.yml
     - name: zmk-nice-oled
       remote: mctechnology17
@@ -17,5 +20,8 @@ manifest:
     - name: zmk_driver_azoteq
       remote: beekeeb
       revision: 52fcfe5026c9f74d611d05b2084548e046a7e274
+    - name: prospector-zmk-module
+      remote: carrefinho
+      revision: feat/new-status-screens
   self:
     path: config

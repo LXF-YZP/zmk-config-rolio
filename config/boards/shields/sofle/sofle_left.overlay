@@ -20,10 +20,12 @@
     col-gpios
         = <&gpio0 29 GPIO_ACTIVE_HIGH>
         , <&gpio0 2 GPIO_ACTIVE_HIGH>
-        , <&gpio1 13 GPIO_ACTIVE_HIGH>
+        // P1.13 is used by the Cake Prospector display SCK.
+        , <&gpio0 22 GPIO_ACTIVE_HIGH>
         , <&gpio0 28 GPIO_ACTIVE_HIGH>
         , <&gpio0 3 GPIO_ACTIVE_HIGH>
-        , <&gpio1 11 GPIO_ACTIVE_HIGH>
+        // P1.11 is used by the Cake Prospector display backlight.
+        , <&gpio0 24 GPIO_ACTIVE_HIGH>
         ;
 };
 
@@ -37,6 +39,7 @@
     };
 };
 
+// The left-hand central receives pointing events from the right-hand touchpad.
 &tps43_listener {
     status = "okay";
 };

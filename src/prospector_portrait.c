@@ -22,6 +22,12 @@
 #define OPERATOR_WPM_BAR_WIDTH 6
 #define OPERATOR_WPM_BAR_GAP 2
 #define OPERATOR_LAYER_DOT_GAP 3
+#define PORTRAIT_LAYOUT_INITIAL_DELAY_MS 100
+#define PORTRAIT_LAYOUT_RETRY_DELAY_MS 50
+#define PORTRAIT_LAYOUT_MAX_RETRIES 40
+
+static uint8_t portrait_layout_retries;
+static struct k_work_delayable prospector_portrait_layout_work;
 
 static int set_prospector_portrait_orientation(void) {
     const struct device *display = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
@@ -39,9 +45,9 @@ SYS_INIT(set_prospector_portrait_orientation, APPLICATION, 61);
 
 #if defined(CONFIG_PROSPECTOR_STATUS_SCREEN_OPERATOR)
 
-static void apply_operator_portrait_layout(lv_obj_t *screen) {
+static bool apply_operator_portrait_layout(lv_obj_t *screen) {
     if (lv_obj_get_child_cnt(screen) < OPERATOR_SCREEN_CHILD_COUNT) {
-        return;
+        return false;
     }
 
     /* Operator creates modifier, WPM, layer dots, battery, and output in this order. */
@@ -78,7 +84,7 @@ static void apply_operator_portrait_layout(lv_obj_t *screen) {
         lv_obj_align(wpm_label, LV_ALIGN_TOP_LEFT, -3, -9);
 
         lv_obj_t *layer_label = lv_obj_get_child(wpm, OPERATOR_WPM_BAR_COUNT + 2);
-        lv_obj_align(layer_label, LV_ALIGN_BOTTOM_RIGHT, 5, 7);
+        lv_obj_align(layer_label, LV_ALIGN_BOTTOM_RIGHT, -2, 7);
     }
 
     lv_obj_set_size(layer, OPERATOR_CONTENT_WIDTH, 6);
@@ -100,13 +106,15 @@ static void apply_operator_portrait_layout(lv_obj_t *screen) {
     /* Stack the two 62 px information blocks to fit the narrower portrait screen. */
     lv_obj_set_pos(battery, 54, 142);
     lv_obj_set_pos(output, 62, 212);
+
+    return true;
 }
 
 #else
 
-static void apply_classic_portrait_layout(lv_obj_t *screen) {
+static bool apply_classic_portrait_layout(lv_obj_t *screen) {
     if (lv_obj_get_child_cnt(screen) < 3) {
-        return;
+        return false;
     }
 
     /* Prospector Classic creates modifier, battery, and layer widgets in this order. */
@@ -127,6 +135,8 @@ static void apply_classic_portrait_layout(lv_obj_t *screen) {
 
     lv_obj_set_size(battery, lv_pct(100), PORTRAIT_BATTERY_HEIGHT);
     lv_obj_align(battery, LV_ALIGN_BOTTOM_MID, 0, 0);
+
+    return true;
 }
 
 #endif
@@ -135,23 +145,28 @@ static void apply_prospector_portrait_layout(struct k_work *work) {
     ARG_UNUSED(work);
 
     lv_obj_t *screen = lv_scr_act();
+    bool applied = false;
 
-    if (screen == NULL) {
-        return;
+    if (screen != NULL) {
+#if defined(CONFIG_PROSPECTOR_STATUS_SCREEN_OPERATOR)
+        applied = apply_operator_portrait_layout(screen);
+#else
+        applied = apply_classic_portrait_layout(screen);
+#endif
     }
 
-#if defined(CONFIG_PROSPECTOR_STATUS_SCREEN_OPERATOR)
-    apply_operator_portrait_layout(screen);
-#else
-    apply_classic_portrait_layout(screen);
-#endif
+    /* ZMK creates and activates the status screen asynchronously. */
+    if (!applied && portrait_layout_retries++ < PORTRAIT_LAYOUT_MAX_RETRIES) {
+        k_work_reschedule_for_queue(zmk_display_work_q(), &prospector_portrait_layout_work,
+                                    K_MSEC(PORTRAIT_LAYOUT_RETRY_DELAY_MS));
+    }
 }
 
-K_WORK_DEFINE(prospector_portrait_layout_work, apply_prospector_portrait_layout);
+K_WORK_DELAYABLE_DEFINE(prospector_portrait_layout_work, apply_prospector_portrait_layout);
 
 static int schedule_prospector_portrait_layout(void) {
-    /* The display initializer queued the screen creation on this same work queue. */
-    k_work_submit_to_queue(zmk_display_work_q(), &prospector_portrait_layout_work);
+    k_work_reschedule_for_queue(zmk_display_work_q(), &prospector_portrait_layout_work,
+                                K_MSEC(PORTRAIT_LAYOUT_INITIAL_DELAY_MS));
     return 0;
 }
 

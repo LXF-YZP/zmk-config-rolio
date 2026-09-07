@@ -85,6 +85,9 @@ static void dual_battery_set_arc(lv_obj_t *arc, lv_obj_t *label, uint8_t level,
     } else {
         lv_label_set_text(label, "--");
     }
+
+    /* Label width is fixed, but realign after every text update for LVGL. */
+    lv_obj_align_to(label, arc, LV_ALIGN_CENTER, 0, 0);
 }
 
 static void dual_battery_update_cb(struct dual_battery_state state) {
@@ -157,8 +160,10 @@ static void create_dual_battery_panel(lv_obj_t *screen, lv_obj_t *upstream_batte
         lv_obj_set_style_arc_color(arc, lv_color_hex(0x383c42), LV_PART_INDICATOR);
 
         lv_obj_t *label = lv_label_create(panel);
+        lv_obj_set_width(label, 54);
         lv_obj_set_style_text_font(label, &FG_Medium_20, LV_PART_MAIN);
         lv_obj_set_style_text_color(label, lv_color_hex(0x909090), LV_PART_MAIN);
+        lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
         lv_label_set_text(label, "--");
         lv_obj_align_to(label, arc, LV_ALIGN_CENTER, 0, 0);
 

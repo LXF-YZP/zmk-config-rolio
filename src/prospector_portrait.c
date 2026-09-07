@@ -162,7 +162,7 @@ static void apply_prospector_portrait_layout(struct k_work *work) {
     }
 }
 
-K_WORK_DELAYABLE_DEFINE(prospector_portrait_layout_work, apply_prospector_portrait_layout);
+static K_WORK_DELAYABLE_DEFINE(prospector_portrait_layout_work, apply_prospector_portrait_layout);
 
 static int schedule_prospector_portrait_layout(void) {
     k_work_reschedule_for_queue(zmk_display_work_q(), &prospector_portrait_layout_work,

@@ -22,7 +22,7 @@ manifest:
       revision: 52fcfe5026c9f74d611d05b2084548e046a7e274
     - name: prospector-zmk-module
       remote: carrefinho
-      # ZMK main is based on Zephyr 4.1; use Prospector's matching API-compatible branch.
-      revision: core/zephyr-4-1
+      # Provides the Operator layout and its matching fonts/widgets.
+      revision: feat/new-status-screens
   self:
     path: config

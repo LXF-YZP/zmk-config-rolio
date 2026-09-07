@@ -14,6 +14,15 @@
 #define PORTRAIT_MODIFIER_HEIGHT 48
 #define PORTRAIT_BATTERY_HEIGHT 48
 
+#define OPERATOR_SCREEN_CHILD_COUNT 5
+#define OPERATOR_WPM_BAR_COUNT 26
+#define OPERATOR_WPM_CHILD_COUNT (OPERATOR_WPM_BAR_COUNT + 3)
+#define OPERATOR_CONTENT_WIDTH 220
+#define OPERATOR_WPM_HEIGHT 80
+#define OPERATOR_WPM_BAR_WIDTH 6
+#define OPERATOR_WPM_BAR_GAP 2
+#define OPERATOR_LAYER_DOT_GAP 3
+
 static int set_prospector_portrait_orientation(void) {
     const struct device *display = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
 
@@ -28,16 +37,79 @@ static int set_prospector_portrait_orientation(void) {
 /* Run after Prospector's orientation initializer at APPLICATION priority 60. */
 SYS_INIT(set_prospector_portrait_orientation, APPLICATION, 61);
 
-static void apply_prospector_portrait_layout(struct k_work *work) {
-    ARG_UNUSED(work);
+#if defined(CONFIG_PROSPECTOR_STATUS_SCREEN_OPERATOR)
 
-    lv_obj_t *screen = lv_scr_act();
-
-    if (screen == NULL || lv_obj_get_child_cnt(screen) < 3) {
+static void apply_operator_portrait_layout(lv_obj_t *screen) {
+    if (lv_obj_get_child_cnt(screen) < OPERATOR_SCREEN_CHILD_COUNT) {
         return;
     }
 
-    /* Prospector creates the modifier, battery, and layer widgets in this order. */
+    /* Operator creates modifier, WPM, layer dots, battery, and output in this order. */
+    lv_obj_t *modifier = lv_obj_get_child(screen, 0);
+    lv_obj_t *wpm = lv_obj_get_child(screen, 1);
+    lv_obj_t *layer = lv_obj_get_child(screen, 2);
+    lv_obj_t *battery = lv_obj_get_child(screen, 3);
+    lv_obj_t *output = lv_obj_get_child(screen, 4);
+
+    lv_obj_set_size(modifier, 230, 24);
+    lv_obj_set_pos(modifier, 5, 4);
+
+    lv_obj_set_size(wpm, OPERATOR_CONTENT_WIDTH, OPERATOR_WPM_HEIGHT);
+    lv_obj_set_pos(wpm, 10, 34);
+
+    if (lv_obj_get_child_cnt(wpm) >= OPERATOR_WPM_CHILD_COUNT) {
+        const int bars_width =
+            OPERATOR_WPM_BAR_COUNT * OPERATOR_WPM_BAR_WIDTH +
+            (OPERATOR_WPM_BAR_COUNT - 1) * OPERATOR_WPM_BAR_GAP;
+        const int bars_x = (OPERATOR_CONTENT_WIDTH - bars_width) / 2;
+
+        for (int i = 0; i < OPERATOR_WPM_BAR_COUNT; i++) {
+            lv_obj_t *bar = lv_obj_get_child(wpm, i);
+            lv_obj_set_size(bar, OPERATOR_WPM_BAR_WIDTH, OPERATOR_WPM_HEIGHT);
+            lv_obj_set_pos(bar, bars_x + i * (OPERATOR_WPM_BAR_WIDTH + OPERATOR_WPM_BAR_GAP),
+                           0);
+        }
+
+        /* Upstream positions the peak marker using its fixed 260 px landscape width. */
+        lv_obj_t *peak = lv_obj_get_child(wpm, OPERATOR_WPM_BAR_COUNT);
+        lv_obj_set_style_opa(peak, LV_OPA_TRANSP, LV_PART_MAIN);
+
+        lv_obj_t *wpm_label = lv_obj_get_child(wpm, OPERATOR_WPM_BAR_COUNT + 1);
+        lv_obj_align(wpm_label, LV_ALIGN_TOP_LEFT, -3, -9);
+
+        lv_obj_t *layer_label = lv_obj_get_child(wpm, OPERATOR_WPM_BAR_COUNT + 2);
+        lv_obj_align(layer_label, LV_ALIGN_BOTTOM_RIGHT, 5, 7);
+    }
+
+    lv_obj_set_size(layer, OPERATOR_CONTENT_WIDTH, 6);
+    lv_obj_set_pos(layer, 10, 126);
+
+    uint32_t layer_dot_count = lv_obj_get_child_cnt(layer);
+    if (layer_dot_count > 0) {
+        int dot_width =
+            (OPERATOR_CONTENT_WIDTH - (layer_dot_count - 1) * OPERATOR_LAYER_DOT_GAP) /
+            layer_dot_count;
+
+        for (uint32_t i = 0; i < layer_dot_count; i++) {
+            lv_obj_t *dot = lv_obj_get_child(layer, i);
+            lv_obj_set_size(dot, dot_width, 6);
+            lv_obj_set_pos(dot, i * (dot_width + OPERATOR_LAYER_DOT_GAP), 0);
+        }
+    }
+
+    /* Stack the two 62 px information blocks to fit the narrower portrait screen. */
+    lv_obj_set_pos(battery, 54, 142);
+    lv_obj_set_pos(output, 62, 212);
+}
+
+#else
+
+static void apply_classic_portrait_layout(lv_obj_t *screen) {
+    if (lv_obj_get_child_cnt(screen) < 3) {
+        return;
+    }
+
+    /* Prospector Classic creates modifier, battery, and layer widgets in this order. */
     lv_obj_t *modifier = lv_obj_get_child(screen, 0);
     lv_obj_t *battery = lv_obj_get_child(screen, 1);
     lv_obj_t *roller = lv_obj_get_child(screen, 2);
@@ -55,6 +127,24 @@ static void apply_prospector_portrait_layout(struct k_work *work) {
 
     lv_obj_set_size(battery, lv_pct(100), PORTRAIT_BATTERY_HEIGHT);
     lv_obj_align(battery, LV_ALIGN_BOTTOM_MID, 0, 0);
+}
+
+#endif
+
+static void apply_prospector_portrait_layout(struct k_work *work) {
+    ARG_UNUSED(work);
+
+    lv_obj_t *screen = lv_scr_act();
+
+    if (screen == NULL) {
+        return;
+    }
+
+#if defined(CONFIG_PROSPECTOR_STATUS_SCREEN_OPERATOR)
+    apply_operator_portrait_layout(screen);
+#else
+    apply_classic_portrait_layout(screen);
+#endif
 }
 
 K_WORK_DEFINE(prospector_portrait_layout_work, apply_prospector_portrait_layout);

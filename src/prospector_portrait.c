@@ -187,8 +187,9 @@ static bool apply_operator_portrait_layout(lv_obj_t *screen) {
         dual_battery_screen = screen;
     }
 
-    lv_obj_set_size(modifier, 230, 24);
-    lv_obj_set_pos(modifier, 5, 4);
+    /* Pull the outer labels in by 5 px and slightly tighten all flex gaps. */
+    lv_obj_set_size(modifier, OPERATOR_CONTENT_WIDTH, 24);
+    lv_obj_set_pos(modifier, 10, 4);
 
     lv_obj_set_size(wpm, OPERATOR_CONTENT_WIDTH, OPERATOR_WPM_HEIGHT);
     lv_obj_set_pos(wpm, 10, 34);

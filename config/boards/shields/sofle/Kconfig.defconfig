@@ -16,6 +16,10 @@ if SHIELD_SOFLE_LEFT || SHIELD_SOFLE_RIGHT
 config ZMK_SPLIT
     default y
 
+# ZMK main supports multiple split transports. Sofle uses the BLE transport.
+config ZMK_SPLIT_BLE
+    default y
+
 if ZMK_DISPLAY && !SHIELD_VISTA508 && !SHIELD_PROSPECTOR_LEFT_ADAPTER
 
 config I2C
@@ -45,4 +49,3 @@ endif # LVGL
 
 
 endif
-

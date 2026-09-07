@@ -7,7 +7,10 @@
 #include <zephyr/init.h>
 #include <zephyr/kernel.h>
 
+#include <zmk/battery.h>
 #include <zmk/display.h>
+#include <zmk/events/battery_state_changed.h>
+#include <zmk/events/split_central_status_changed.h>
 
 #define PORTRAIT_CONTENT_WIDTH 224
 #define PORTRAIT_ROLLER_HEIGHT 160
@@ -45,6 +48,127 @@ SYS_INIT(set_prospector_portrait_orientation, APPLICATION, 61);
 
 #if defined(CONFIG_PROSPECTOR_STATUS_SCREEN_OPERATOR)
 
+LV_FONT_DECLARE(FG_Medium_20);
+
+struct dual_battery_state {
+    uint8_t local_level;
+    uint8_t peripheral_level;
+    bool peripheral_connected;
+};
+
+static uint8_t dual_battery_peripheral_level;
+static bool dual_battery_peripheral_connected;
+static lv_obj_t *dual_battery_arcs[2];
+static lv_obj_t *dual_battery_labels[2];
+
+static void dual_battery_set_arc(lv_obj_t *arc, lv_obj_t *label, uint8_t level,
+                                 bool connected) {
+    bool low_battery = connected && level > 0 && level <= 20;
+
+    if (low_battery) {
+        lv_obj_set_style_arc_color(arc, lv_color_hex(0x584028), LV_PART_MAIN);
+        lv_obj_set_style_arc_color(arc, lv_color_hex(0xC08040), LV_PART_INDICATOR);
+        lv_obj_set_style_text_color(label, lv_color_hex(0xC08040), LV_PART_MAIN);
+    } else if (connected) {
+        lv_obj_set_style_arc_color(arc, lv_color_hex(0x2a4036), LV_PART_MAIN);
+        lv_obj_set_style_arc_color(arc, lv_color_hex(0x54806c), LV_PART_INDICATOR);
+        lv_obj_set_style_text_color(label, lv_color_white(), LV_PART_MAIN);
+    } else {
+        lv_obj_set_style_arc_color(arc, lv_color_hex(0x282c30), LV_PART_MAIN);
+        lv_obj_set_style_arc_color(arc, lv_color_hex(0x383c42), LV_PART_INDICATOR);
+        lv_obj_set_style_text_color(label, lv_color_hex(0x909090), LV_PART_MAIN);
+    }
+
+    lv_arc_set_value(arc, connected ? level : 0);
+    if (connected && level > 0) {
+        lv_label_set_text_fmt(label, "%d", (int)level);
+    } else {
+        lv_label_set_text(label, "--");
+    }
+}
+
+static void dual_battery_update_cb(struct dual_battery_state state) {
+    if (dual_battery_arcs[0] == NULL || dual_battery_arcs[1] == NULL ||
+        dual_battery_labels[0] == NULL || dual_battery_labels[1] == NULL) {
+        return;
+    }
+
+    /* The central half is always the local keyboard battery. */
+    dual_battery_set_arc(dual_battery_arcs[0], dual_battery_labels[0], state.local_level, true);
+    dual_battery_set_arc(dual_battery_arcs[1], dual_battery_labels[1], state.peripheral_level,
+                         state.peripheral_connected);
+}
+
+static struct dual_battery_state dual_battery_get_state(const zmk_event_t *eh) {
+    if (eh != NULL) {
+        const struct zmk_peripheral_battery_state_changed *battery_event =
+            as_zmk_peripheral_battery_state_changed(eh);
+        if (battery_event != NULL && battery_event->source == 0) {
+            dual_battery_peripheral_level = battery_event->state_of_charge;
+            dual_battery_peripheral_connected = battery_event->state_of_charge > 0;
+        }
+
+        const struct zmk_split_central_status_changed *connection_event =
+            as_zmk_split_central_status_changed(eh);
+        if (connection_event != NULL && connection_event->slot == 0) {
+            dual_battery_peripheral_connected = connection_event->connected;
+            if (!connection_event->connected) {
+                dual_battery_peripheral_level = 0;
+            }
+        }
+    }
+
+    return (struct dual_battery_state){
+        .local_level = zmk_battery_state_of_charge(),
+        .peripheral_level = dual_battery_peripheral_level,
+        .peripheral_connected = dual_battery_peripheral_connected,
+    };
+}
+
+ZMK_DISPLAY_WIDGET_LISTENER(prospector_dual_battery, struct dual_battery_state,
+                            dual_battery_update_cb, dual_battery_get_state)
+ZMK_SUBSCRIPTION(prospector_dual_battery, zmk_battery_state_changed);
+ZMK_SUBSCRIPTION(prospector_dual_battery, zmk_peripheral_battery_state_changed);
+ZMK_SUBSCRIPTION(prospector_dual_battery, zmk_split_central_status_changed);
+
+static void create_dual_battery_panel(lv_obj_t *screen, lv_obj_t *upstream_battery) {
+    lv_obj_add_flag(upstream_battery, LV_OBJ_FLAG_HIDDEN);
+
+    lv_obj_t *panel = lv_obj_create(screen);
+    lv_obj_set_size(panel, 132, 62);
+    lv_obj_set_pos(panel, 54, 142);
+    lv_obj_set_style_bg_opa(panel, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(panel, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(panel, 0, LV_PART_MAIN);
+
+    for (int i = 0; i < 2; i++) {
+        lv_obj_t *arc = lv_arc_create(panel);
+        lv_obj_set_size(arc, 54, 54);
+        lv_obj_set_pos(arc, i * 68, 4);
+        lv_arc_set_range(arc, 0, 100);
+        lv_arc_set_value(arc, 0);
+        lv_arc_set_bg_angles(arc, 0, 360);
+        lv_arc_set_rotation(arc, 270);
+        lv_obj_set_style_arc_width(arc, 3, LV_PART_MAIN);
+        lv_obj_set_style_arc_width(arc, 5, LV_PART_INDICATOR);
+        lv_obj_remove_style(arc, NULL, LV_PART_KNOB);
+        lv_obj_clear_flag(arc, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_set_style_arc_color(arc, lv_color_hex(0x282c30), LV_PART_MAIN);
+        lv_obj_set_style_arc_color(arc, lv_color_hex(0x383c42), LV_PART_INDICATOR);
+
+        lv_obj_t *label = lv_label_create(panel);
+        lv_obj_set_style_text_font(label, &FG_Medium_20, LV_PART_MAIN);
+        lv_obj_set_style_text_color(label, lv_color_hex(0x909090), LV_PART_MAIN);
+        lv_label_set_text(label, "--");
+        lv_obj_align_to(label, arc, LV_ALIGN_CENTER, 0, 0);
+
+        dual_battery_arcs[i] = arc;
+        dual_battery_labels[i] = label;
+    }
+
+    prospector_dual_battery_init();
+}
+
 static bool apply_operator_portrait_layout(lv_obj_t *screen) {
     if (lv_obj_get_child_cnt(screen) < OPERATOR_SCREEN_CHILD_COUNT) {
         return false;
@@ -56,6 +180,12 @@ static bool apply_operator_portrait_layout(lv_obj_t *screen) {
     lv_obj_t *layer = lv_obj_get_child(screen, 2);
     lv_obj_t *battery = lv_obj_get_child(screen, 3);
     lv_obj_t *output = lv_obj_get_child(screen, 4);
+
+    static lv_obj_t *dual_battery_screen;
+    if (dual_battery_screen != screen) {
+        create_dual_battery_panel(screen, battery);
+        dual_battery_screen = screen;
+    }
 
     lv_obj_set_size(modifier, 230, 24);
     lv_obj_set_pos(modifier, 5, 4);

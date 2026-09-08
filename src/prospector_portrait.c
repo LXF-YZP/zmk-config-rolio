@@ -11,6 +11,9 @@
 #include <zmk/display.h>
 #include <zmk/events/battery_state_changed.h>
 #include <zmk/events/split_central_status_changed.h>
+#if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
+#include <zmk/events/usb_conn_state_changed.h>
+#endif
 
 #define PORTRAIT_CONTENT_WIDTH 224
 #define PORTRAIT_ROLLER_HEIGHT 160
@@ -63,7 +66,7 @@ static lv_obj_t *dual_battery_labels[2];
 
 static void dual_battery_set_arc(lv_obj_t *arc, lv_obj_t *label, uint8_t level,
                                  bool connected) {
-    bool low_battery = connected && level > 0 && level <= 20;
+    bool low_battery = connected && level <= 20;
 
     if (low_battery) {
         lv_obj_set_style_arc_color(arc, lv_color_hex(0x584028), LV_PART_MAIN);
@@ -80,7 +83,7 @@ static void dual_battery_set_arc(lv_obj_t *arc, lv_obj_t *label, uint8_t level,
     }
 
     lv_arc_set_value(arc, connected ? level : 0);
-    if (connected && level > 0) {
+    if (connected) {
         lv_label_set_text_fmt(label, "%d", (int)level);
     } else {
         lv_label_set_text(label, "--");
@@ -108,7 +111,8 @@ static struct dual_battery_state dual_battery_get_state(const zmk_event_t *eh) {
             as_zmk_peripheral_battery_state_changed(eh);
         if (battery_event != NULL && battery_event->source == 0) {
             dual_battery_peripheral_level = battery_event->state_of_charge;
-            dual_battery_peripheral_connected = battery_event->state_of_charge > 0;
+            /* A reported 0% is a valid reading, not a disconnected peripheral. */
+            dual_battery_peripheral_connected = true;
         }
 
         const struct zmk_split_central_status_changed *connection_event =
@@ -133,6 +137,10 @@ ZMK_DISPLAY_WIDGET_LISTENER(prospector_dual_battery, struct dual_battery_state,
 ZMK_SUBSCRIPTION(prospector_dual_battery, zmk_battery_state_changed);
 ZMK_SUBSCRIPTION(prospector_dual_battery, zmk_peripheral_battery_state_changed);
 ZMK_SUBSCRIPTION(prospector_dual_battery, zmk_split_central_status_changed);
+#if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
+/* USB insertion/removal may not change the battery percentage. */
+ZMK_SUBSCRIPTION(prospector_dual_battery, zmk_usb_conn_state_changed);
+#endif
 
 static void create_dual_battery_panel(lv_obj_t *screen, lv_obj_t *upstream_battery) {
     lv_obj_add_flag(upstream_battery, LV_OBJ_FLAG_HIDDEN);

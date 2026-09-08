@@ -24,7 +24,7 @@
         , <&gpio0 22 GPIO_ACTIVE_HIGH>
         , <&gpio0 28 GPIO_ACTIVE_HIGH>
         , <&gpio0 3 GPIO_ACTIVE_HIGH>
-        // P0.24 is used by the display reset; P1.13 is now free for COL5.
+        // P0.24 is used by the display DC; P1.13 is now free for COL5.
         , <&gpio1 13 GPIO_ACTIVE_HIGH>
         ;
 };

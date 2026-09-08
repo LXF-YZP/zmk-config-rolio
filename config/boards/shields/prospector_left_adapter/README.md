@@ -9,8 +9,8 @@ controller. The left half remains the ZMK split central; no dongle is used.
 | MOSI | D2 | P0.17 |
 | MISO | Not used | Not used |
 | CS | D1 | P0.06 |
-| DC | E73 pad | P0.13 |
-| RESET | D5 | P0.24 |
+| DC | D5 | P0.24 |
+| RESET | E73 pad | P0.13 |
 | Backlight PWM | D14 | P1.11 |
 | VCC | 3V3 | 3V3 |
 | GND | GND | GND |
@@ -29,4 +29,4 @@ The APDS9960 ambient-light sensor is unavailable with this wiring because its
 former I2C pins P0.17 and P0.20 are now used by the display SPI bus. Brightness
 therefore uses the fixed value from `config/sofle_left.conf`. P0.13 is normally
 the nice!nano v2 external-power control pin, so that devicetree node is disabled
-before P0.13 is assigned to the display DC signal.
+before P0.13 is assigned to the display RESET signal.

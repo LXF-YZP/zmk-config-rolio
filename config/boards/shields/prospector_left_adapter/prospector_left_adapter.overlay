@@ -1,7 +1,7 @@
 /*
  * Prospector ST7789 display wiring for the Sofle left controller.
  *
- * P0.24 is used by the display reset line and P1.11 by its backlight;
+ * P0.24 is used by the display DC line and P1.11 by its backlight;
  * sofle_left.overlay moves the affected matrix columns to P0.22 and P1.13.
  */
 
@@ -68,8 +68,8 @@ prospector_disp_spi: &spi3 {
     mipi_dbi {
         compatible = "zephyr,mipi-dbi-spi";
         spi-dev = <&spi3>;
-        dc-gpios = <&gpio0 13 GPIO_ACTIVE_HIGH>;
-        reset-gpios = <&gpio0 24 GPIO_ACTIVE_LOW>;
+        dc-gpios = <&gpio0 24 GPIO_ACTIVE_HIGH>;
+        reset-gpios = <&gpio0 13 GPIO_ACTIVE_LOW>;
         write-only;
         #address-cells = <1>;
         #size-cells = <0>;

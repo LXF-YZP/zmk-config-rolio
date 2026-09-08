@@ -3,6 +3,15 @@
 This adapter drives the Prospector ST7789 display directly from the Sofle left
 controller. The left half remains the ZMK split central; no dongle is used.
 
+## Status screen
+
+The Operator UI and portrait layout fixes are ported from `caip2` (531753e),
+using Prospector's `feat/new-status-screens` branch. The display remains at
+240 x 280 with a final 180-degree orientation. It shows both battery levels
+with centered labels and uses the narrower modifier row and inset layer name.
+The screen stays on at 80% fixed brightness with left-half deep sleep disabled.
+The E73 wiring below is preserved independently of the UI port.
+
 | Display signal | nice!nano pin | nRF52840 pin |
 | --- | --- | --- |
 | SCK | D3 | P0.20 |

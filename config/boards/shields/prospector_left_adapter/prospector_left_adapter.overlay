@@ -1,25 +1,22 @@
 /*
- * Prospector ST7789 display wiring for the Sofle left nice!nano, matching the
- * Cake central receiver pin assignment.
+ * Prospector ST7789 display wiring for the Sofle left controller.
  *
- * P1.13 and P1.11 were matrix columns in the original Sofle configuration;
- * sofle_left.overlay moves those columns to P0.22 and P0.24.
+ * P0.24 is used by the display reset line and P1.11 by its backlight;
+ * sofle_left.overlay moves the affected matrix columns to P0.22 and P1.13.
  */
 
 &pinctrl {
     prospector_spi3_default: prospector_spi3_default {
         group1 {
-            psels = <NRF_PSEL(SPIM_SCK, 1, 13)>,
-                    <NRF_PSEL(SPIM_MOSI, 1, 15)>,
-                    <NRF_PSEL(SPIM_MISO, 1, 10)>;
+            psels = <NRF_PSEL(SPIM_SCK, 0, 20)>,
+                    <NRF_PSEL(SPIM_MOSI, 0, 17)>;
         };
     };
 
     prospector_spi3_sleep: prospector_spi3_sleep {
         group1 {
-            psels = <NRF_PSEL(SPIM_SCK, 1, 13)>,
-                    <NRF_PSEL(SPIM_MOSI, 1, 15)>,
-                    <NRF_PSEL(SPIM_MISO, 1, 10)>;
+            psels = <NRF_PSEL(SPIM_SCK, 0, 20)>,
+                    <NRF_PSEL(SPIM_MOSI, 0, 17)>;
             low-power-enable;
         };
     };
@@ -38,20 +35,6 @@
         };
     };
 
-    prospector_i2c0_default: prospector_i2c0_default {
-        group1 {
-            psels = <NRF_PSEL(TWIM_SDA, 0, 17)>,
-                    <NRF_PSEL(TWIM_SCL, 0, 20)>;
-        };
-    };
-
-    prospector_i2c0_sleep: prospector_i2c0_sleep {
-        group1 {
-            psels = <NRF_PSEL(TWIM_SDA, 0, 17)>,
-                    <NRF_PSEL(TWIM_SCL, 0, 20)>;
-            low-power-enable;
-        };
-    };
 };
 
 prospector_disp_spi: &spi3 {
@@ -59,21 +42,11 @@ prospector_disp_spi: &spi3 {
     pinctrl-0 = <&prospector_spi3_default>;
     pinctrl-1 = <&prospector_spi3_sleep>;
     pinctrl-names = "default", "sleep";
-    cs-gpios = <&gpio1 6 GPIO_ACTIVE_LOW>;
+    cs-gpios = <&gpio0 6 GPIO_ACTIVE_LOW>;
 };
 
 &pro_micro_i2c {
-    status = "okay";
-    pinctrl-0 = <&prospector_i2c0_default>;
-    pinctrl-1 = <&prospector_i2c0_sleep>;
-    pinctrl-names = "default", "sleep";
-
-    apds9960: apds9960@39 {
-        compatible = "avago,apds9960";
-        status = "okay";
-        reg = <0x39>;
-        int-gpios = <&gpio1 0 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
-    };
+    status = "disabled";
 };
 
 &oled {
@@ -81,6 +54,9 @@ prospector_disp_spi: &spi3 {
 };
 
 / {
+    /* nice!nano v2 normally uses P0.13 for external-power control. */
+    /delete-node/ EXT_POWER;
+
     pwmleds {
         compatible = "pwm-leds";
 
@@ -92,8 +68,8 @@ prospector_disp_spi: &spi3 {
     mipi_dbi {
         compatible = "zephyr,mipi-dbi-spi";
         spi-dev = <&spi3>;
-        dc-gpios = <&gpio1 4 GPIO_ACTIVE_HIGH>;
-        reset-gpios = <&gpio0 11 GPIO_ACTIVE_LOW>;
+        dc-gpios = <&gpio0 13 GPIO_ACTIVE_HIGH>;
+        reset-gpios = <&gpio0 24 GPIO_ACTIVE_LOW>;
         write-only;
         #address-cells = <1>;
         #size-cells = <0>;

@@ -12,6 +12,11 @@ with centered labels and uses the narrower modifier row and inset layer name.
 The screen stays on at 80% fixed brightness with left-half deep sleep disabled.
 The E73 wiring below is preserved independently of the UI port.
 
+The left half has no battery. Its circle displays 100% whenever USB power is
+detected, independently of the selected USB/BLE output. This is a display-only
+power indicator, not a measured battery level. The right circle still shows the
+peripheral's reported battery level.
+
 | Display signal | nice!nano pin | nRF52840 pin |
 | --- | --- | --- |
 | SCK | D3 | P0.20 |

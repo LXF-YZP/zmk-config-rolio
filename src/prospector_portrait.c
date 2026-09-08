@@ -13,6 +13,7 @@
 #include <zmk/events/split_central_status_changed.h>
 #if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
 #include <zmk/events/usb_conn_state_changed.h>
+#include <zmk/usb.h>
 #endif
 
 #define PORTRAIT_CONTENT_WIDTH 224
@@ -99,7 +100,7 @@ static void dual_battery_update_cb(struct dual_battery_state state) {
         return;
     }
 
-    /* The central half is always the local keyboard battery. */
+    /* The central half shows local power; the peripheral keeps its reported battery level. */
     dual_battery_set_arc(dual_battery_arcs[0], dual_battery_labels[0], state.local_level, true);
     dual_battery_set_arc(dual_battery_arcs[1], dual_battery_labels[1], state.peripheral_level,
                          state.peripheral_connected);
@@ -125,8 +126,18 @@ static struct dual_battery_state dual_battery_get_state(const zmk_event_t *eh) {
         }
     }
 
+    uint8_t local_level = zmk_battery_state_of_charge();
+#if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
+    /* This left half has no battery: show 100% while USB supplies power.
+     * This is display-only and independent of the selected USB/BLE output.
+     */
+    if (zmk_usb_is_powered()) {
+        local_level = 100;
+    }
+#endif
+
     return (struct dual_battery_state){
-        .local_level = zmk_battery_state_of_charge(),
+        .local_level = local_level,
         .peripheral_level = dual_battery_peripheral_level,
         .peripheral_connected = dual_battery_peripheral_connected,
     };

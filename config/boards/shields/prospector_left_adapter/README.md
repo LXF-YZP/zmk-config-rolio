@@ -9,13 +9,13 @@ The Operator UI and portrait layout fixes are ported from `caip2` (531753e),
 using Prospector's `feat/new-status-screens` branch. The display remains at
 240 x 280 with a final 180-degree orientation. It shows both battery levels
 with centered labels and uses the narrower modifier row and inset layer name.
-The screen stays on at 80% fixed brightness with left-half deep sleep disabled.
+The screen stays on at 50% fixed brightness with left-half deep sleep disabled.
 The E73 wiring below is preserved independently of the UI port.
 
-The left half has no battery. Its circle displays 100% whenever USB power is
-detected, independently of the selected USB/BLE output. This is a display-only
-power indicator, not a measured battery level. The right circle still shows the
-peripheral's reported battery level.
+The left circle displays the measured left-half battery level while running
+wirelessly. It displays 100% whenever USB power is detected, independently of
+the selected USB/BLE output. The right circle shows the peripheral's reported
+battery level.
 
 | Display signal | nice!nano pin | nRF52840 pin |
 | --- | --- | --- |

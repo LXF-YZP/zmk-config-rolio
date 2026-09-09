@@ -128,8 +128,8 @@ static struct dual_battery_state dual_battery_get_state(const zmk_event_t *eh) {
 
     uint8_t local_level = zmk_battery_state_of_charge();
 #if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
-    /* This left half has no battery: show 100% while USB supplies power.
-     * This is display-only and independent of the selected USB/BLE output.
+    /* Show external USB power as 100%; otherwise keep the measured left battery level.
+     * This is independent of the selected USB/BLE output.
      */
     if (zmk_usb_is_powered()) {
         local_level = 100;

@@ -37,8 +37,9 @@
     vbatt: vbatt {
         compatible = "zmk,battery-voltage-divider";
         io-channels = <&adc 2>;
+        // Schematic: VBAT -- R10 820K -- AIN2 -- R11 2M -- GND.
         output-ohms = <2000000>;
-        full-ohms = <(2000000 + 806000)>;
+        full-ohms = <(2000000 + 820000)>;
     };
 };
 

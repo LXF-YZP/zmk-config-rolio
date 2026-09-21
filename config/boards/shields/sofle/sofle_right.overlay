@@ -5,6 +5,55 @@
  */
 
 #include "sofle.dtsi"
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+
+// PAW3395: SCK=P0.08, MOSI=P0.17, MISO=P0.20, CS=P1.04, IRQ=P0.09.
+&pinctrl {
+    spi2_default: spi2_default {
+        group1 {
+            psels = <NRF_PSEL(SPIM_SCK, 0, 8)>,
+                    <NRF_PSEL(SPIM_MOSI, 0, 17)>,
+                    <NRF_PSEL(SPIM_MISO, 0, 20)>;
+        };
+    };
+
+    spi2_sleep: spi2_sleep {
+        group1 {
+            psels = <NRF_PSEL(SPIM_SCK, 0, 8)>,
+                    <NRF_PSEL(SPIM_MOSI, 0, 17)>,
+                    <NRF_PSEL(SPIM_MISO, 0, 20)>;
+            low-power-enable;
+        };
+    };
+};
+
+&spi2 {
+    compatible = "nordic,nrf-spim";
+    status = "okay";
+    pinctrl-0 = <&spi2_default>;
+    pinctrl-1 = <&spi2_sleep>;
+    pinctrl-names = "default", "sleep";
+    cs-gpios = <&gpio1 4 GPIO_ACTIVE_LOW>;
+
+    paw3395: paw3395@0 {
+        compatible = "pixart,paw3395";
+        status = "okay";
+        reg = <0>;
+        spi-max-frequency = <4000000>;
+        irq-gpios = <&gpio0 9 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+        cpi = <600>;
+        evt-type = <INPUT_EV_REL>;
+        x-input-code = <INPUT_REL_X>;
+        y-input-code = <INPUT_REL_Y>;
+    };
+};
+
+/ {
+    paw3395_listener: paw3395_listener {
+        compatible = "zmk,input-listener";
+        device = <&paw3395>;
+    };
+};
 
 &default_transform {
     col-offset = <6>;
@@ -30,21 +79,6 @@
         ;
 };
 
-// Trackpad I2C pins: SCL=P0.20, SDA=P0.17.
-&i2c0_default {
-    group1 {
-        psels = <NRF_PSEL(TWIM_SCL, 0, 20)>,
-                <NRF_PSEL(TWIM_SDA, 0, 17)>;
-    };
-};
-
-&i2c0_sleep {
-    group1 {
-        psels = <NRF_PSEL(TWIM_SCL, 0, 20)>,
-                <NRF_PSEL(TWIM_SDA, 0, 17)>;
-    };
-};
-
 / {
     chosen {
       zmk,battery = &vbatt;
@@ -55,45 +89,10 @@
     };
 };
 
-&tps43_split {
-    status = "okay";
-    device = <&tps43>;
-};
-
-
 &pro_micro_i2c {
-    status = "okay";
+    status = "disabled";
 };
 
 &oled {
     status = "disabled";
-};
-
-&tps43 {
-    status = "okay";
-
-    rst-gpios = <&gpio1 0 GPIO_ACTIVE_HIGH>;
-    rdy-gpios = <&gpio1 2 GPIO_ACTIVE_HIGH>;
-
-    /*
-     * Potentially non-exhaustive list of configuration options.
-     * See: dts/bindings/input/azoteq,tps43-common.yaml for a full list.
-     */
-    single-tap;
-    press-and-hold;
-    hold-time = <250>;
-    two-finger-tap;
-
-    scroll;
-    invert-scroll-y;
-    swipes;
-    zoom;
-    enable-power-management;
-
-    sensitivity = <100>;
-    scroll-sensitivity = <30>;
-    zoom-sensitivity = <50>;
-    filter-settings = <0x0B>;
-
-    switch-xy;
 };

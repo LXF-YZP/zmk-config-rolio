@@ -17,8 +17,5 @@ manifest:
     - name: zmk-paw3395-driver
       remote: badjeff
       revision: main
-    - name: ads1220-zephyr-module
-      remote: badjeff
-      revision: main
   self:
     path: config

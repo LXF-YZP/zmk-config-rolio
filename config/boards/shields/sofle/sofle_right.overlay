@@ -7,7 +7,7 @@
 #include "sofle.dtsi"
 #include <zephyr/dt-bindings/input/input-event-codes.h>
 
-// PAW3395: SCK=P0.08, MOSI=P0.17, MISO=P0.20, CS=P1.04, IRQ=P0.09.
+// PAW3395: SCK=P0.08, MOSI=P0.17, MISO=P0.20, CS=P1.04, IRQ=P0.11 (D7).
 &pinctrl {
     spi2_default: spi2_default {
         group1 {
@@ -40,7 +40,7 @@
         status = "okay";
         reg = <0>;
         spi-max-frequency = <4000000>;
-        irq-gpios = <&gpio0 9 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+        irq-gpios = <&gpio0 11 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
         cpi = <600>;
         evt-type = <INPUT_EV_REL>;
         x-input-code = <INPUT_REL_X>;

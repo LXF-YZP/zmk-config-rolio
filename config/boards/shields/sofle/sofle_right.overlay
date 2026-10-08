@@ -73,28 +73,25 @@
 &tps43 {
     status = "okay";
 
-    rst-gpios = <&gpio1 0 GPIO_ACTIVE_HIGH>;
+    // The IQS5xx driver asserts reset with logical 1; RST is active low.
+    reset-gpios = <&gpio1 0 GPIO_ACTIVE_LOW>;
     rdy-gpios = <&gpio1 2 GPIO_ACTIVE_HIGH>;
 
     /*
      * Potentially non-exhaustive list of configuration options.
-     * See: dts/bindings/input/azoteq,tps43-common.yaml for a full list.
+     * See: dts/bindings/input/azoteq,iqs5xx-common.yaml for a full list.
      */
-    single-tap;
+    one-finger-tap;
     press-and-hold;
-    hold-time = <250>;
+    press-and-hold-time = <250>;
     two-finger-tap;
 
     scroll;
-    invert-scroll-y;
-    swipes;
-    zoom;
-    enable-power-management;
+    // Preserve the old driver's raw X and inverted Y scroll directions.
+    natural-scroll-x;
+    natural-scroll-y;
 
-    sensitivity = <100>;
-    scroll-sensitivity = <30>;
-    zoom-sensitivity = <50>;
-    filter-settings = <0x0B>;
+    cursor-scale-percent = <100>;
 
     switch-xy;
 };

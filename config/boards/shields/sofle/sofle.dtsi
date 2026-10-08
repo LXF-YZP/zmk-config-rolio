@@ -85,7 +85,7 @@ RC(3,0) RC(3,1) RC(3,2) RC(3,3) RC(3,4) RC(3,5)                    RC(3,6) RC(3,
 
     tps43: trackpad@74 {
         status = "disabled";
-        compatible = "azoteq,tps43";
+        compatible = "azoteq,iqs5xx";
         reg = <0x74>;
     };
 };

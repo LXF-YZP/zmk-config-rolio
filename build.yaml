@@ -13,12 +13,10 @@
 #
 ---
 include:
-  - board: nice_nano_v2
-    shield: sofle_left nice_oled
-    snippet: studio-rpc-usb-uart
-    artifact-name: nice_sofle_left_oled
-  - board: nice_nano_v2
-    shield: sofle_right nice_oled
-    artifact-name: nice_sofle_right_oled
-  - board: nice_nano_v2
+  # The board dts already provides the ZMK Studio CDC-ACM UART, so do not add
+  # the studio-rpc-usb-uart snippet here.
+  - board: zitaotech_q10
+    artifact-name: bbq10_pro_default_firmware
+  - board: zitaotech_q10
     shield: settings_reset
+    artifact-name: bbq10_pro_reset_firmware

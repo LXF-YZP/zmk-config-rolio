@@ -2,23 +2,12 @@ manifest:
   remotes:
     - name: zmkfirmware
       url-base: https://github.com/zmkfirmware
-    #- name: petejohanson
-    #  url-base: https://github.com/petejohanson
-    # nice_oled - nice_epaper - dongle_display!view - oled Adapter
-    - name: mctechnology17
-      url-base: https://github.com/mctechnology17
-    - name: AYM1607
-      url-base: https://github.com/AYM1607
   projects:
+    # zitaotech_q10 uses the Zephyr 3.5 board layout (HWMv1). ZMK main has
+    # moved to Zephyr 4.1, so keep this pinned to a v0.3 release.
     - name: zmk
       remote: zmkfirmware
-      revision: v0.2
+      revision: v0.3
       import: app/west.yml
-    - name: zmk-nice-oled
-      remote: mctechnology17
-      revision: main
-    - name: zmk-driver-azoteq-iqs5xx
-      remote: AYM1607
-      revision: main
   self:
     path: config

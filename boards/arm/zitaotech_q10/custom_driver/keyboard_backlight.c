@@ -124,11 +124,12 @@ static void polling_work_handler(struct k_work *work) {
         cycle_direction_up = true;
 
         switch (current_layer) {
-        case 0:
+        case 0: {
             /* 层0：跟随 RGB 和活动状态 */
             uint8_t brt = (rgb_on && active) ? ug_brt : 0;
             set_led_brightness(brt);
             break;
+        }
 
         case 1:
             /*

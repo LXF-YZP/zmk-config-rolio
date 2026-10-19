@@ -1,0 +1,10 @@
+# Copyright (c) 2025 ZitaoTech
+# SPDX-License-Identifier: MIT
+
+description: |
+  Avago ADBS-A320 optical finger navigation sensor on I2C.
+  Driver: boards/arm/zitaotech_q10/custom_driver/a320.c
+
+compatible: "avago,a320"
+
+include: i2c-device.yaml

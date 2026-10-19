@@ -3,6 +3,8 @@
 
 if BOARD_ZITAOTECH_Q10
 
+config BOARD
+    default "zitaotech_q10"
 
 config ZMK_KEYBOARD_NAME
     default "ZitaoTech_q10"

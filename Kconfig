@@ -1,0 +1,15 @@
+# Options for boards/shields/bbq10_trackpad/custom_driver/a320.c
+
+if SHIELD_BBQ10_TRACKPAD
+
+config INPUT_A320_INIT_PRIORITY
+    int "A320 trackpad init priority"
+    default 90
+    help
+      Must be greater than the I2C and GPIO driver init priorities.
+
+module = A320
+module-str = a320
+source "subsys/logging/Kconfig.template.log_config"
+
+endif # SHIELD_BBQ10_TRACKPAD

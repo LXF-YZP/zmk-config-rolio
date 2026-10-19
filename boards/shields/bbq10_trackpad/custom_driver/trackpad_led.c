@@ -60,6 +60,15 @@ static bool keyboard_active = false;
 static bool usb_flash_state = false; /* true=亮灯，false=灭灯 */
 static bool usb_mode = false;        /* 当前是否处于 USB 传输模式 */
 
+/* 没有键盘背光时（nice!nano 测试板）按原机默认背光亮度 100 处理 */
+static uint8_t keyboard_backlight_brt(void) {
+#if IS_ENABLED(CONFIG_ZMK_BACKLIGHT)
+    return zmk_backlight_get_brt();
+#else
+    return BRT_MAX;
+#endif
+}
+
 static void set_led_brightness(uint8_t level) {
     if (!device_is_ready(led_dev)) {
         LOG_ERR("LED device not ready");
@@ -124,7 +133,7 @@ static void polling_work_handler(struct k_work *work) {
     bool current_capslock = (zmk_hid_indicators_get_current_profile() & HID_INDICATORS_CAPS_LOCK);
     bool current_touch = tp_is_touched();
     bool current_active = (zmk_activity_get_state() == ZMK_ACTIVITY_ACTIVE);
-    uint8_t current_brt = zmk_backlight_get_brt();
+    uint8_t current_brt = keyboard_backlight_brt();
 
     /* ---------------- USB 模式 ---------------- */
     if (transport == ZMK_TRANSPORT_USB) {
@@ -221,7 +230,7 @@ static int indicator_tp_init(void) {
     set_led_brightness(0);
     usb_mode = false;
     usb_flash_state = false;
-    last_backlight_brt = zmk_backlight_get_brt();
+    last_backlight_brt = keyboard_backlight_brt();
     capslock_on = touch_active = manual_override = keyboard_active = false;
 
     k_work_init_delayable(&polling_work, polling_work_handler);

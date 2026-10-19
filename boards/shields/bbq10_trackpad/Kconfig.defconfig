@@ -1,0 +1,6 @@
+if SHIELD_BBQ10_TRACKPAD
+
+config ZMK_KEYBOARD_NAME
+    default "BBQ10 Trackpad"
+
+endif

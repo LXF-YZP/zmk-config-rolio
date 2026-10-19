@@ -3,8 +3,8 @@ manifest:
     - name: zmkfirmware
       url-base: https://github.com/zmkfirmware
   projects:
-    # zitaotech_q10 uses the Zephyr 3.5 board layout (HWMv1). ZMK main has
-    # moved to Zephyr 4.1, so keep this pinned to a v0.3 release.
+    # Pinned to the ZMK release the trackpad drivers were checked against.
+    # ZMK main has moved to Zephyr 4.1.
     - name: zmk
       remote: zmkfirmware
       revision: v0.3

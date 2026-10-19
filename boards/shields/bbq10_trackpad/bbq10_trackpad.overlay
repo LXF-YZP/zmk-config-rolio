@@ -1,0 +1,102 @@
+/*
+ * BlackBerry Q10 trackpad (ADBS-A320) test shield for nice!nano v2.
+ * Trackpad circuit is identical to the ZitaotechQ10 Pro schematic, except
+ * SDA moves from P1.09 (not broken out on nice!nano) to P0.06.
+ *
+ *   P0.06 (D1)  TP_SDA_3V3   I2C SDA, pulled up by RN1, no internal pull
+ *   P0.08 (D0)  TP_SCL_3V3   I2C SCL, pulled up by RN1, no internal pull
+ *   P1.01       TP_MOTION    hard-coded as gpio1 pin 1 in a320.c
+ *   P1.13 (D15) TPBLK        trackpad backlight PWM
+ *   P0.22 (D4)  ROW8 / KEYA  trackpad press switch
+ *   P0.17 (D2)  COL3 / KEYB  trackpad press switch
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
+#include <dt-bindings/zmk/matrix_transform.h>
+
+/ {
+    chosen {
+        zmk,kscan = &kscan0;
+        zmk,matrix-transform = &default_transform;
+        zmk,trackpad_led = &trackpad_led;
+    };
+
+    kscan0: kscan {
+        compatible = "zmk,kscan-gpio-matrix";
+        diode-direction = "col2row";
+        wakeup-source;
+        row-gpios = <&gpio0 22 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;
+        col-gpios = <&gpio0 17 GPIO_ACTIVE_HIGH>;
+    };
+
+    default_transform: keymap_transform_0 {
+        compatible = "zmk,matrix-transform";
+        rows = <1>;
+        columns = <1>;
+        map = <RC(0,0)>;
+    };
+
+    trackpad_led: trackpad_led {
+        compatible = "pwm-leds";
+        pwm_led_0 {
+            pwms = <&pwm1 0 PWM_USEC(20) PWM_POLARITY_NORMAL>;
+        };
+    };
+
+    bbtrackpad_listener: bbtrackpad_listener {
+        compatible = "zmk,input-listener";
+        device = <&bbtrackpad>;
+    };
+};
+
+&i2c0 {
+    status = "okay";
+    compatible = "nordic,nrf-twim";
+    clock-frequency = <I2C_BITRATE_FAST>;
+    pinctrl-0 = <&bbq10_i2c0_default>;
+    pinctrl-1 = <&bbq10_i2c0_sleep>;
+    pinctrl-names = "default", "sleep";
+
+    bbtrackpad: a320@3b {
+        compatible = "avago,a320";
+        reg = <0x3b>;
+    };
+};
+
+&pwm1 {
+    status = "okay";
+    pinctrl-0 = <&bbq10_pwm1_default>;
+    pinctrl-1 = <&bbq10_pwm1_sleep>;
+    pinctrl-names = "default", "sleep";
+};
+
+&pinctrl {
+    bbq10_i2c0_default: bbq10_i2c0_default {
+        group1 {
+            psels = <NRF_PSEL(TWIM_SDA, 0, 6)>,
+                <NRF_PSEL(TWIM_SCL, 0, 8)>;
+        };
+    };
+
+    bbq10_i2c0_sleep: bbq10_i2c0_sleep {
+        group1 {
+            psels = <NRF_PSEL(TWIM_SDA, 0, 6)>,
+                <NRF_PSEL(TWIM_SCL, 0, 8)>;
+            low-power-enable;
+        };
+    };
+
+    bbq10_pwm1_default: bbq10_pwm1_default {
+        group1 {
+            psels = <NRF_PSEL(PWM_OUT0, 1, 13)>;
+        };
+    };
+
+    bbq10_pwm1_sleep: bbq10_pwm1_sleep {
+        group1 {
+            psels = <NRF_PSEL(PWM_OUT0, 1, 13)>;
+            bias-pull-down;
+        };
+    };
+};

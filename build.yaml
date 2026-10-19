@@ -13,10 +13,14 @@
 #
 ---
 include:
-  # The board dts already provides the ZMK Studio CDC-ACM UART, so do not add
-  # the studio-rpc-usb-uart snippet here.
-  - board: zitaotech_q10
-    artifact-name: bbq10_pro_default_firmware
-  - board: zitaotech_q10
+  - board: nice_nano_v2
+    shield: bbq10_trackpad
+    artifact-name: nice_nano_v2_bbq10_trackpad
+  # Same firmware with logs over the USB serial port, for troubleshooting.
+  - board: nice_nano_v2
+    shield: bbq10_trackpad
+    snippet: zmk-usb-logging
+    cmake-args: -DCONFIG_LOG_PROCESS_THREAD_STARTUP_DELAY_MS=4000
+    artifact-name: nice_nano_v2_bbq10_trackpad_usb_logging
+  - board: nice_nano_v2
     shield: settings_reset
-    artifact-name: bbq10_pro_reset_firmware

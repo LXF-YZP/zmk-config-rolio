@@ -1,9 +1,0 @@
-# Copyright (c) 2023 ZitaoTech
-# SPDX-License-Identifier: MIT
-
-# Zephyr 3.5 sources this file inside the "Board Selection" choice, so it may
-# only declare the board symbol. Board options live in the Kconfig file.
-
-config BOARD_ZITAOTECH_Q10
-    bool "ZitaoTech_q10"
-    depends on SOC_NRF52840_QIAA

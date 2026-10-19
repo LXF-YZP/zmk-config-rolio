@@ -1,0 +1,13 @@
+#include <behaviors.dtsi>
+#include <dt-bindings/zmk/mouse.h>
+
+/ {
+    keymap {
+        compatible = "zmk,keymap";
+
+        default_layer {
+            // 触控板按压开关 = 鼠标左键
+            bindings = <&mkp LCLK>;
+        };
+    };
+};

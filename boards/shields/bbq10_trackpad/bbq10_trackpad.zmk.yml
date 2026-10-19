@@ -1,0 +1,8 @@
+file_format: "1"
+id: bbq10_trackpad
+name: BBQ10 Trackpad
+type: shield
+url: https://github.com/ZitaoTech/BBQ10_Keyboard_Pro
+requires: [pro_micro]
+features:
+  - keys

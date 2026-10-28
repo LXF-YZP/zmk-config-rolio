@@ -7,14 +7,13 @@
  *   KEYA / KEYB -> P0.02 / P0.03（触控板左右键，独立输入）
  *   row7        -> P0.29
  *   col7        -> P0.28
- *   col19       -> P1.14
- *   col18       -> P1.15
+ *   col8        -> P1.15
+ *   col9        -> P1.14
  *   TP_SDA/SCL  -> P0.04 / P0.05（i2c0）
  *   KEY3        -> NRST（硬件复位，不作为键盘按键）
  *
- * 注意：原理图底部三枚 Kailh 按键的列网名是 col7/col8/col9，MCU 侧却是
- * col7/col19/col18。本配置按编号对应：col8/col18->P1.15、col9/col19->P1.14；请先统一原理图和
- * PCB 中的第二、第三列网名，否则这两列不会与 MCU 实际连通。
+ * 三枚 Kailh 按键按图中从左到右的 col7、col8、col9 顺序映射。
+ * 二极管阴极接列，电流由行流向列，使用 row2col 扫描。
  */
 
 / {
@@ -34,7 +33,7 @@
 
     /* 触控板 KEYA/KEYB 左右键，低电平有效。 */
     kscan_clicks: kscan_clicks {
-        compatible = "zmk,kscan-gpio-direct-active-low";
+        compatible = "zmk,kscan-gpio-direct";
         input-gpios = <&gpio0 2 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>,
                       <&gpio0 3 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
     };

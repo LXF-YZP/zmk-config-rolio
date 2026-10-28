@@ -1,0 +1,26 @@
+/*
+ * Q20 trackpad keyboard keymap.
+ *
+ * 物理按键（来自原理图）：
+ *   KEYA -> P0.02（第一个按键）
+ *   KEYB -> P0.03（第二个按键）
+ *   KEY3 -> NRST（复位键，硬件复位，不在 keymap 里）
+ *
+ * 触控板（Avago A320）自动作为鼠标移动，无需在这里配置。
+ */
+
+#include <behaviors.dtsi>
+#include <dt-bindings/zmk/keys.h>
+#include <dt-bindings/zmk/mouse.h>
+
+/ {
+    keymap {
+        compatible = "zmk,keymap";
+
+        default_layer {
+            bindings = <
+                &mkp LCLK    &mkp RCLK
+            >;
+        };
+    };
+};

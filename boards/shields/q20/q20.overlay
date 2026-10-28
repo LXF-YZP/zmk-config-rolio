@@ -1,0 +1,29 @@
+/*
+ * Q20 shield for Seeeduino XIAO BLE (nRF52840).
+ *
+ * 引脚（来自原理图 微信图片_20261028010516_13_7.png）：
+ *   I2C SDA  -> P0.04（XIAO BLE 的 i2c0 SDA，默认引脚，无需改 pinctrl）
+ *   I2C SCL  -> P0.05（XIAO BLE 的 i2c0 SCL，默认引脚）
+ *   KEYA     -> P0.02（即 xiao D0）
+ *   KEYB     -> P0.03（即 xiao D1）
+ *   KEY3     -> NRST（硬件复位）
+ */
+
+/ {
+    kscan0: kscan {
+        compatible = "zmk,kscan-gpio-direct";
+        input-gpios
+            = <&gpio0 2 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
+            , <&gpio0 3 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
+            ;
+    };
+};
+
+&i2c0 {
+    status = "okay";
+    a320: a320@3b {
+        compatible = "avago,a320";
+        status = "okay";
+        reg = <0x3B>;
+    };
+};

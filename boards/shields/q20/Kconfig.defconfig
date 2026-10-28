@@ -1,0 +1,6 @@
+if SHIELD_Q20
+
+config ZMK_KEYBOARD_NAME
+    default "Q20 Trackpad Keyboard"
+
+endif

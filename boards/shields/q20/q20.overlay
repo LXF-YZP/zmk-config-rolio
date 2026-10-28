@@ -1,30 +1,65 @@
+#include <zephyr/dt-bindings/gpio/gpio.h>
+
 /*
- * Q20 shield for Seeeduino XIAO BLE (nRF52840).
+ * Seeeduino XIAO BLE (nRF52840) 的 Q20 shield。
  *
- * 引脚（来自原理图 微信图片_20261028010516_13_7.png）：
- *   I2C SDA  -> P0.04（XIAO BLE 的 i2c0 SDA，默认引脚，无需改 pinctrl）
- *   I2C SCL  -> P0.05（XIAO BLE 的 i2c0 SCL，默认引脚）
- *   KEYA     -> P0.02（即 xiao D0）
- *   KEYB     -> P0.03（即 xiao D1）
- *   KEY3     -> NRST（硬件复位）
+ * 按原理图对应的主控引脚：
+ *   KEYA / KEYB -> P0.02 / P0.03（触控板左右键，独立输入）
+ *   row7        -> P0.29
+ *   col7        -> P0.28
+ *   col19       -> P1.14
+ *   col18       -> P1.15
+ *   TP_SDA/SCL  -> P0.04 / P0.05（i2c0）
+ *   KEY3        -> NRST（硬件复位，不作为键盘按键）
+ *
+ * 注意：原理图底部三枚 Kailh 按键的列网名是 col7/col8/col9，MCU 侧却是
+ * col7/col19/col18。本配置按编号对应：col8/col18->P1.15、col9/col19->P1.14；请先统一原理图和
+ * PCB 中的第二、第三列网名，否则这两列不会与 MCU 实际连通。
  */
 
 / {
     chosen {
-        zmk,kscan = &kscan0;
+        zmk,kscan = &kscan_composite;
     };
 
-    kscan0: kscan {
-        compatible = "zmk,kscan-gpio-direct";
-        input-gpios
-            = <&gpio0 2 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
-            , <&gpio0 3 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
-            ;
+    /* 三枚 Kailh 按键：一行三列矩阵。 */
+    kscan_matrix: kscan_matrix {
+        compatible = "zmk,kscan-gpio-matrix";
+        row-gpios = <&gpio0 29 GPIO_ACTIVE_HIGH>;
+        col-gpios = <&gpio0 28 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>,
+                    <&gpio1 15 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>,
+                    <&gpio1 14 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;
+        diode-direction = "row2col";
+    };
+
+    /* 触控板 KEYA/KEYB 左右键，低电平有效。 */
+    kscan_clicks: kscan_clicks {
+        compatible = "zmk,kscan-gpio-direct-active-low";
+        input-gpios = <&gpio0 2 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>,
+                      <&gpio0 3 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+    };
+
+    /* 三枚矩阵按键在前，左右点击键排在其后。 */
+    kscan_composite: kscan_composite {
+        compatible = "zmk,kscan-composite";
+        rows = <1>;
+        columns = <5>;
+
+        matrix {
+            kscan = <&kscan_matrix>;
+        };
+
+        clicks {
+            kscan = <&kscan_clicks>;
+            column-offset = <3>;
+        };
     };
 };
 
+/* XIAO 默认 i2c0 的 P0.04/P0.05 经电平转换后连接 A320 触控板。 */
 &i2c0 {
     status = "okay";
+
     a320: a320@3b {
         compatible = "avago,a320";
         status = "okay";

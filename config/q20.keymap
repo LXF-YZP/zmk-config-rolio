@@ -1,12 +1,8 @@
 /*
- * Q20 trackpad keyboard keymap.
+ * Q20 触控板键盘键位。
  *
- * 物理按键（来自原理图）：
- *   KEYA -> P0.02（第一个按键）
- *   KEYB -> P0.03（第二个按键）
- *   KEY3 -> NRST（复位键，硬件复位，不在 keymap 里）
- *
- * 触控板（Avago A320）自动作为鼠标移动，无需在这里配置。
+ * 三枚 Kailh 机械键组成一行三列矩阵，默认键位为 Esc、空格、回车，可按需修改。
+ * KEYA/KEYB 分别作为触控板左键/右键；KEY3 连接 NRST，直接硬件复位 MCU。
  */
 
 #include <behaviors.dtsi>
@@ -19,7 +15,7 @@
 
         default_layer {
             bindings = <
-                &mkp LCLK    &mkp RCLK
+                &kp ESC    &kp SPACE  &kp ENTER  &mkp LCLK  &mkp RCLK
             >;
         };
     };

@@ -1,6 +1,8 @@
 if SHIELD_Q20
 
+# 名字必须 ≤16 字符（BLE 设备名限制），并且 fork 的 main.c 依赖
+# CONFIG_ZMK_KEYBOARD_NAME == "bbq20" 来启用 Q20 触控板 -> 鼠标的处理分支。
 config ZMK_KEYBOARD_NAME
-    default "Q20 Trackpad Keyboard"
+    default "bbq20"
 
 endif

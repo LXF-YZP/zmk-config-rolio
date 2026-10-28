@@ -1,8 +1,10 @@
 /*
  * Q20 触控板键盘键位。
  *
- * 三枚 Kailh 机械键组成一行三列矩阵，默认键位为 Esc、空格、回车，可按需修改。
- * KEYA/KEYB 分别作为触控板左键/右键；KEY3 连接 NRST，直接硬件复位 MCU。
+ * 三枚 Kailh 机械键组成一行三列矩阵，默认键位为右 Option（RALT）、空格、回车，可按需修改。
+ * 第 4 位是触控板按压（KEYA/KEYB 是同一个开关的两端），默认作为鼠标左键。
+ * 硬件上没有单独的右键，需要右键时可把前三个键之一改成 &mkp RCLK。
+ * KEY3 连接 NRST，直接硬件复位 MCU，不在键位表里。
  */
 
 #include <behaviors.dtsi>
@@ -15,7 +17,7 @@
 
         default_layer {
             bindings = <
-                &kp ESC    &kp SPACE  &kp ENTER  &mkp LCLK  &mkp RCLK
+                &kp RALT   &kp SPACE  &kp ENTER  &mkp LCLK
             >;
         };
     };

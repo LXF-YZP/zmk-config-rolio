@@ -4,7 +4,7 @@
  * Seeeduino XIAO BLE (nRF52840) 的 Q20 shield。
  *
  * 按原理图对应的主控引脚：
- *   KEYA / KEYB -> P0.02 / P0.03（触控板左右键，独立输入）
+ *   KEYA / KEYB -> P0.02 / P0.03（触控板按压开关的两端，FPC 15/14 脚）
  *   row7        -> P0.29
  *   col7        -> P0.28
  *   col8        -> P1.15
@@ -31,25 +31,30 @@
         diode-direction = "row2col";
     };
 
-    /* 触控板 KEYA/KEYB 左右键，低电平有效。 */
-    kscan_clicks: kscan_clicks {
-        compatible = "zmk,kscan-gpio-direct";
-        input-gpios = <&gpio0 2 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>,
-                      <&gpio0 3 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+    /*
+     * 触控板按压开关：KEYA、KEYB 是同一个开关的两端，两端都不接地，
+     * 所以不能用上拉 + 低电平有效的 direct 扫描，按 1×1 矩阵处理：
+     * KEYA 输出高电平，KEYB 下拉输入，按下时 KEYB 读到高电平。
+     */
+    kscan_click: kscan_click {
+        compatible = "zmk,kscan-gpio-matrix";
+        row-gpios = <&gpio0 2 GPIO_ACTIVE_HIGH>;
+        col-gpios = <&gpio0 3 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;
+        diode-direction = "row2col";
     };
 
-    /* 三枚矩阵按键在前，左右点击键排在其后。 */
+    /* 三枚矩阵按键在前（第 0~2 位），触控板按压排在第 3 位。 */
     kscan_composite: kscan_composite {
         compatible = "zmk,kscan-composite";
         rows = <1>;
-        columns = <5>;
+        columns = <4>;
 
         matrix {
             kscan = <&kscan_matrix>;
         };
 
-        clicks {
-            kscan = <&kscan_clicks>;
+        click {
+            kscan = <&kscan_click>;
             column-offset = <3>;
         };
     };

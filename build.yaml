@@ -7,3 +7,9 @@
 include:
   - board: seeeduino_xiao_ble
     shield: q20
+  # 调试固件：通过 USB 串口输出日志，用来确认 A320 的 I2C 通信是否正常。
+  # 触控板问题排查完后可以删掉这一项。
+  - board: seeeduino_xiao_ble
+    shield: q20
+    cmake-args: -DCONFIG_ZMK_USB_LOGGING=y -DCONFIG_SENSOR_LOG_LEVEL_DBG=y
+    artifact-name: q20-seeeduino_xiao_ble-debug

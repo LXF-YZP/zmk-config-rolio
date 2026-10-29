@@ -8,14 +8,13 @@
  *   J2 3V3  -> VCC（P0.13 控制的 EXT_POWER，由 nice_nano_v2 板子定义管理）
  *   J2 SCL  -> P0.20 (D3)   i2c0 默认引脚
  *   J2 SDA  -> P0.17 (D2)   i2c0 默认引脚
- *   J3 KEYA -> GND
- *   J3 KEYB -> P0.06 (D1)   触控板按压，按下为低电平
+ *   J3 KEYA -> P0.24 (D5)   触控板按压开关一端，扫描时输出高电平
+ *   J3 KEYB -> P0.06 (D1)   触控板按压开关另一端，下拉输入，按下为高电平
  *   J3 BLK  -> P0.08 (D0)   触控板背光 PWM，高电平点亮
  *   J3 MOT  -> P0.22 (D4)   固件不使用：驱动按 CONFIG_INPUT_A320_POLLINGRATE 轮询
  *
- * 三枚 Kailh 按键（从左到右）一端接 GND，另一端接：
- *   P0.24 (D5)、P1.00 (D6)、P0.11 (D7)
- * 原来接 NRST 的复位键改接 nice!nano 的 RST 和 GND。
+ * 不接 Kailh 按键，唯一的按键是触控板按压。
+ * 复位键接 nice!nano 的 RST 和 GND。
  */
 
 / {
@@ -25,15 +24,14 @@
     };
 
     /*
-     * 所有按键一端都接地，用 direct 扫描：内部上拉，低电平有效。
-     * 三枚 Kailh 键在前（第 0~2 位），触控板按压排在第 3 位。
+     * 触控板按压开关：KEYA、KEYB 是同一个开关的两端，都接 GPIO，按 1×1 矩阵处理
+     * （与 q20 分支相同）：KEYA 输出高电平，KEYB 下拉输入，按下时 KEYB 读到高电平。
      */
     kscan0: kscan0 {
-        compatible = "zmk,kscan-gpio-direct";
-        input-gpios = <&gpio0 24 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>,
-                      <&gpio1 0 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>,
-                      <&gpio0 11 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>,
-                      <&gpio0 6 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+        compatible = "zmk,kscan-gpio-matrix";
+        row-gpios = <&gpio0 24 GPIO_ACTIVE_HIGH>;
+        col-gpios = <&gpio0 6 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;
+        diode-direction = "row2col";
     };
 
     /* 触控板背光：BLK 经 Q3 低边开关驱动背光 LED，板上 R16 下拉，PWM 停止时熄灭。 */

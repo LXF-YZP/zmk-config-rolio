@@ -1,35 +1,22 @@
 /*
- * Q20 触控板键盘键位（nice!nano v2）。
+ * Q20 触控板键盘键位（nice!nano v2，触控板按压 1×1 矩阵）。
  *
- * 三枚 Kailh 机械键按从左到右的顺序占第 0~2 位，默认键位为右 Option（RALT）、空格、回车，可按需修改。
- * 第 4 位是触控板按压（KEYA 接地，KEYB 接 P0.06），默认作为鼠标左键。
- * 硬件上没有单独的右键，需要右键时可把前三个键之一改成 &mkp RCLK。
+ * 只有一个按键：触控板按压（KEYA 接 P0.24，KEYB 接 P0.06），默认作为鼠标左键。
  * 复位键接 nice!nano 的 RST，直接硬件复位 MCU，不在键位表里。
- * 同时按下第 1 和第 3 枚 Kailh 键（RALT + 回车）开关触控板背光。
+ * 没有 Kailh 键，也就没有背光开关组合键；背光上电默认开启。
  */
 
 #include <behaviors.dtsi>
-#include <dt-bindings/zmk/backlight.h>
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/mouse.h>
 
 / {
-    combos {
-        compatible = "zmk,combos";
-
-        combo_backlight_toggle {
-            timeout-ms = <50>;
-            key-positions = <0 2>;
-            bindings = <&bl BL_TOG>;
-        };
-    };
-
     keymap {
         compatible = "zmk,keymap";
 
         default_layer {
             bindings = <
-                &kp RALT   &kp SPACE  &kp ENTER  &mkp LCLK
+                &mkp LCLK
             >;
         };
     };

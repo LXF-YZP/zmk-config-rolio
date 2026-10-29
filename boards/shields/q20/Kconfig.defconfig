@@ -1,8 +1,11 @@
 if SHIELD_Q20
 
-# 名字必须 ≤16 字符（BLE 设备名限制），并且 fork 的 main.c 依赖
-# CONFIG_ZMK_KEYBOARD_NAME == "bbq20" 来启用 Q20 触控板 -> 鼠标的处理分支。
+# 名字必须 ≤16 字符（BLE 设备名限制），并且 fork 的 main.c 按
+# CONFIG_ZMK_KEYBOARD_NAME 选择触控板 -> 鼠标的处理分支：
+#   "bbq20"  -> x = -Delta_X, y = Delta_Y
+#   "bbcase" -> x = Delta_Y,  y = Delta_X（X/Y 轴对换）
+# 这里用 "bbcase" 让触控板 X/Y 轴对换，其余速度/滚动逻辑与 bbq20 分支相同。
 config ZMK_KEYBOARD_NAME
-    default "bbq20"
+    default "bbcase"
 
 endif

@@ -29,7 +29,7 @@ nice!nano 正面朝上、USB 在上，"第 N 脚"从 USB 一端数起，不算�
 - 不接 Kailh 按键，键位表只有触控板按压一个键（鼠标左键）。
 - 触控板供电来自 nice!nano 的 VCC，由 P0.13（EXT_POWER）控制。不要在固件里关闭外部供电，
   否则触控板会断电。
-- 触控板背光：上电默认开启，亮度 40%。没有 Kailh 键，所以去掉了背光开关组合键。
+- 触控板背光：上电默认开启，亮度 100%。没有 Kailh 键，所以去掉了背光开关组合键。
 
 ## 编译产物
 
@@ -51,4 +51,4 @@ nice!nano 正面朝上、USB 在上，"第 N 脚"从 USB 一端数起，不算�
   fork 的 `main.c` 用哪套坐标映射（同时也是蓝牙名）。`bbq20` 为默认；改成 `bbq10` 则 X、Y 都反向；
   改成 `bb9900` 则 X、Y 轴对调（x 取 Y 读数、y 取 X 读数）。
 - 速度、滚动间隔：`config/q20.conf` 里的 `CONFIG_TRACKPAD_*`。
-- 背光默认亮度：在 `config/q20.conf` 加 `CONFIG_ZMK_BACKLIGHT_BRT_START=<1~100>`。
+- 背光默认亮度：`config/q20.conf` 里的 `CONFIG_ZMK_BACKLIGHT_BRT_START=<1~100>`。

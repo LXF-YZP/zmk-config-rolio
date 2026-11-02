@@ -121,6 +121,6 @@ static int a320_init(const struct device *dev) {
         .swap_xy = DT_INST_PROP(inst, swap_xy),                                                     \
     };                                                                                             \
     DEVICE_DT_INST_DEFINE(inst, a320_init, NULL, &a320_data_##inst, &a320_config_##inst, POST_KERNEL,   \
-                          CONFIG_KERNEL_INIT_PRIORITY_DEVICE, NULL);
+                          60, NULL);
 
 DT_INST_FOREACH_STATUS_OKAY(A320_DEFINE)

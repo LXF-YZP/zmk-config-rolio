@@ -3,8 +3,7 @@ config INPUT_A320
     bool "Q20 ADBS-A320 optical trackpad"
     default y
     depends on DT_HAS_AVAGO_A320_ENABLED
-    depends on I2C && ZMK_POINTING
-    select INPUT
+    depends on I2C && ZMK_POINTING && INPUT
     select ZMK_HID_INDICATORS
 
 if INPUT_A320

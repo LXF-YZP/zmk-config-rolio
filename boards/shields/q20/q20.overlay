@@ -1,4 +1,5 @@
 #include <zephyr/dt-bindings/gpio/gpio.h>
+#include <zephyr/dt-bindings/pwm/pwm.h>
 
 /*
  * Seeeduino XIAO BLE (nRF52840) 的 Q20 shield。
@@ -10,6 +11,7 @@
  *   col8        -> P1.15
  *   col9        -> P1.14
  *   TP_SDA/SCL  -> P0.04 / P0.05（i2c0）
+ *   TPBLK       -> P1.13（Q2 栅极，R4 下拉；高电平点亮触控板背光）
  *   KEY3        -> NRST（硬件复位，不作为键盘按键）
  *
  * 三枚 Kailh 按键按图中从左到右的 col7、col8、col9 顺序映射。
@@ -19,6 +21,15 @@
 / {
     chosen {
         zmk,kscan = &kscan_composite;
+        zmk,backlight = &backlight;
+    };
+
+    /* 触控板背光：P1.13 经 Q2（AO3400A）低边驱动 TPBLK_LEDK，用 PWM 调光。 */
+    backlight: pwmleds {
+        compatible = "pwm-leds";
+        pwm_led_0 {
+            pwms = <&pwm0 0 PWM_MSEC(10) PWM_POLARITY_NORMAL>;
+        };
     };
 
     /* 三枚 Kailh 按键：一行三列矩阵。 */
@@ -68,5 +79,27 @@
         compatible = "avago,a320";
         status = "okay";
         reg = <0x3B>;
+    };
+};
+
+&pwm0 {
+    status = "okay";
+    pinctrl-0 = <&pwm0_default>;
+    pinctrl-1 = <&pwm0_sleep>;
+    pinctrl-names = "default", "sleep";
+};
+
+&pinctrl {
+    pwm0_default: pwm0_default {
+        group1 {
+            psels = <NRF_PSEL(PWM_OUT0, 1, 13)>;
+        };
+    };
+
+    pwm0_sleep: pwm0_sleep {
+        group1 {
+            psels = <NRF_PSEL(PWM_OUT0, 1, 13)>;
+            low-power-enable;
+        };
     };
 };

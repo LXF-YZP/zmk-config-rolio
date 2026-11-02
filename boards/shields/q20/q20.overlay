@@ -80,7 +80,8 @@
 
         click {
             kscan = <&kscan_click>;
-            column-offset = <3>;
+            /* v0.3 supplies a default col-offset=0, overriding the deprecated name. */
+            col-offset = <3>;
         };
     };
 };

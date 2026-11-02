@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: MIT
+description: Avago ADBS-A320 optical trackpad, polled over I2C
+compatible: "avago,a320"
+include: i2c-device.yaml
+
+properties:
+  swap-xy:
+    type: boolean
+    description: Exchange X and Y before reporting pointer or scroll movement.

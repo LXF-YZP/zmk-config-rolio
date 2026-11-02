@@ -1,5 +1,7 @@
 #include <zephyr/dt-bindings/gpio/gpio.h>
 #include <zephyr/dt-bindings/pwm/pwm.h>
+#include <dt-bindings/zmk/matrix_transform.h>
+#include "q20-layouts.dtsi"
 
 /*
  * Seeeduino XIAO BLE (nRF52840) 的 Q20 shield。
@@ -20,8 +22,20 @@
 
 / {
     chosen {
-        zmk,kscan = &kscan_composite;
+        zmk,physical-layout = &q20_layout;
         zmk,backlight = &backlight;
+    };
+
+    q20_transform: q20_transform {
+        compatible = "zmk,matrix-transform";
+        rows = <1>;
+        columns = <4>;
+        map = <RC(0, 0) RC(0, 1) RC(0, 2) RC(0, 3)>;
+    };
+
+    trackpad_listener {
+        compatible = "zmk,input-listener";
+        device = <&a320>;
     };
 
     /* 触控板背光：P1.13 经 Q2（AO3400A）低边驱动 TPBLK_LEDK，用 PWM 调光。 */
@@ -79,7 +93,13 @@
         compatible = "avago,a320";
         status = "okay";
         reg = <0x3B>;
+        swap-xy;
     };
+};
+
+&q20_layout {
+    kscan = <&kscan_composite>;
+    transform = <&q20_transform>;
 };
 
 &pwm0 {

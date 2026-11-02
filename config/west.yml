@@ -1,13 +1,13 @@
 manifest:
   remotes:
-    - name: ZitaoTech
-      url-base: https://github.com/ZitaoTech
+    - name: zmkfirmware
+      url-base: https://github.com/zmkfirmware
   projects:
-    # bbkeyboard_tp 是 ZitaoTech 的 ZMK 分支，内置 Avago A320 触控板驱动
-    # （标准 ZMK v0.3 没有 avago,a320 驱动）。
+    # 官方 v0.3 系列，固定版本以便复现 Studio 构建。
+    # A320 驱动由本仓库的 Zephyr 模块提供，不再依赖旧 fork 的 main.c。
     - name: zmk
-      remote: ZitaoTech
-      revision: bbkeyboard_tp
+      remote: zmkfirmware
+      revision: 3cf9006a9377f21c99e944e29e2a507d8c3e9069
       import: app/west.yml
   self:
     path: config

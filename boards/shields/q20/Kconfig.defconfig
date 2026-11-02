@@ -1,9 +1,6 @@
 if SHIELD_Q20
 
-# fork 的 main.c 按 CONFIG_ZMK_KEYBOARD_NAME 选择触控板 -> 鼠标的处理分支：
-#   "bbq20"  -> x = -Delta_X, y = Delta_Y
-#   "bbcase" -> x = Delta_Y,  y = Delta_X（X/Y 轴对换）
-# 这里保留 "bbcase" 以使用交换后的 X/Y 映射；蓝牙显示名称在 q20.conf 中单独设为 q20。
+# 保留 USB 产品名称；触控板 X/Y 对换由 overlay 中的 swap-xy 控制。
 config ZMK_KEYBOARD_NAME
     default "bbcase"
 

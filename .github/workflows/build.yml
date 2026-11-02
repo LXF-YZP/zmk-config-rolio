@@ -2,5 +2,13 @@ name: Build ZMK firmware
 on: [push, pull_request, workflow_dispatch]
 
 jobs:
+  motion-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check A320 motion conversion
+        run: |
+          cc -std=c11 -Wall -Wextra -Werror -fsanitize=undefined tests/test_a320_motion.c -o /tmp/test-a320-motion
+          /tmp/test-a320-motion
   build:
     uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@v0.3

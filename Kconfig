@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: MIT
+config INPUT_A320
+    bool "Q20 ADBS-A320 optical trackpad"
+    default y
+    depends on DT_HAS_AVAGO_A320_ENABLED
+    depends on I2C && ZMK_POINTING
+    select INPUT
+    select ZMK_HID_INDICATORS
+
+if INPUT_A320
+
+config INPUT_A320_POLLINGRATE
+    int "Trackpad samples per second"
+    default 100
+    range 10 200
+
+config TRACKPAD_SPEEDMULTIPLIER_HORIZONTAL
+    int "Horizontal speed percentage (100 retains the original 1.5x gain)"
+    default 100
+    range 1 400
+
+config TRACKPAD_SPEEDMULTIPLIER_VERTICAL
+    int "Vertical speed percentage (100 retains the original 1.5x gain)"
+    default 100
+    range 1 400
+
+config TRACKPAD_SCROLL_INTERVAL
+    int "Polling interval in legacy lock-key scroll mode, in milliseconds"
+    default 20
+    range 5 100
+
+endif

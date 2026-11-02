@@ -1,0 +1,13 @@
+#include <physical_layouts.dtsi>
+
+/ {
+    q20_layout: q20_layout {
+        compatible = "zmk,physical-layout";
+        display-name = "Q20: 3 keys + trackpad click";
+        /* Schematic view; order MUST match the four keymap/transform positions. */
+        keys = <&key_physical_attrs 100 100   0 120 0 0 0>,
+               <&key_physical_attrs 100 100 120 120 0 0 0>,
+               <&key_physical_attrs 100 100 240 120 0 0 0>,
+               <&key_physical_attrs 100 100 120   0 0 0 0>;
+    };
+};

@@ -1,8 +1,9 @@
 /*
  * SPDX-License-Identifier: MIT
  *
- * Q20 ADBS-A320 input driver. Register addresses and legacy scroll behavior
- * follow ZitaoTech/zmk, bbkeyboard_tp (6bb7b0244fa644368cbce7a4790c5edff7ecb4f5).
+ * Q20 ADBS-A320 input driver. Register addresses follow ZitaoTech/zmk,
+ * bbkeyboard_tp (6bb7b0244fa644368cbce7a4790c5edff7ecb4f5); scroll mode is
+ * toggled locally by Caps Lock key events.
  * Uses Zephyr input events so official ZMK owns mouse reports and Studio RPC.
  */
 #define DT_DRV_COMPAT avago_a320
@@ -13,11 +14,44 @@
 #include <zephyr/input/input.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
-#include <zmk/hid_indicators.h>
+#include <zephyr/sys/atomic.h>
+#include <zmk/event_manager.h>
+#include <zmk/events/keycode_state_changed.h>
+#include <zmk/keys.h>
 
 #include "a320_motion.h"
 
 LOG_MODULE_REGISTER(q20_a320, CONFIG_ZMK_LOG_LEVEL);
+
+static atomic_t a320_scroll_enabled;
+static atomic_t a320_caps_lock_down;
+
+static int a320_keycode_state_changed_listener(const zmk_event_t *eh) {
+    struct zmk_keycode_state_changed *event = as_zmk_keycode_state_changed(eh);
+    if (event == NULL || event->usage_page != HID_USAGE_KEY ||
+        event->keycode != HID_USAGE_KEY_KEYBOARD_CAPS_LOCK) {
+        return ZMK_EV_EVENT_BUBBLE;
+    }
+
+    if (!event->state) {
+        atomic_set(&a320_caps_lock_down, 0);
+        return ZMK_EV_EVENT_BUBBLE;
+    }
+
+    if (atomic_cas(&a320_caps_lock_down, 0, 1)) {
+        atomic_val_t previous;
+        do {
+            previous = atomic_get(&a320_scroll_enabled);
+        } while (!atomic_cas(&a320_scroll_enabled, previous,
+                             a320_toggle_scroll_mode(previous != 0)));
+        LOG_INF("Trackpad scroll mode %s", previous ? "off" : "on");
+    }
+
+    return ZMK_EV_EVENT_BUBBLE;
+}
+
+ZMK_LISTENER(a320_scroll_listener, a320_keycode_state_changed_listener);
+ZMK_SUBSCRIPTION(a320_scroll_listener, zmk_keycode_state_changed);
 
 #define A320_REG_MOTION 0x02
 #define A320_REG_DELTA_X 0x03
@@ -70,7 +104,7 @@ static void a320_poll(void *device, void *unused1, void *unused2) {
     while (true) {
         struct a320_motion motion;
         int ret = a320_read_motion(dev, &motion);
-        bool scrolling = a320_scroll_mode(zmk_hid_indicators_get_current_profile());
+        bool scrolling = atomic_get(&a320_scroll_enabled) != 0;
         if (ret == 0) {
             io_error = false;
             if (scrolling) {

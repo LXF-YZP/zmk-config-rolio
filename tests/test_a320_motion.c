@@ -36,14 +36,11 @@ int main(void) {
     expect_motion(a320_scroll((struct a320_motion){0, -20}), 0, 1);
     expect_motion(a320_scroll((struct a320_motion){0, 127}), 0, -7);
     expect_motion(a320_scroll((struct a320_motion){0, -128}), 0, 5);
-    assert(!a320_scroll_mode(0));
-    assert(!a320_scroll_mode(1));
-    assert(a320_scroll_mode(2));
-    assert(a320_scroll_mode(3));
-    assert(a320_scroll_mode(4));
-    assert(!a320_scroll_mode(5));
-    assert(!a320_scroll_mode(6));
-    assert(a320_scroll_mode(7));
+    bool scrolling = false;
+    scrolling = a320_toggle_scroll_mode(scrolling);
+    assert(scrolling);
+    scrolling = a320_toggle_scroll_mode(scrolling);
+    assert(!scrolling);
     puts("A320 signed movement, axis swap, gain and scroll checks passed");
     return 0;
 }

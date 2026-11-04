@@ -20,9 +20,8 @@ static inline int16_t a320_scale(int16_t delta, int percentage) {
     return (int32_t)delta * 3 * percentage / 200;
 }
 
-static inline bool a320_scroll_mode(uint8_t indicators) {
-    /* Preserve the lock-LED combinations used by the bbcase firmware. */
-    return indicators == 2 || indicators == 3 || indicators == 4 || indicators == 7;
+static inline bool a320_toggle_scroll_mode(bool enabled) {
+    return !enabled;
 }
 
 static inline struct a320_motion a320_scroll(struct a320_motion motion) {
